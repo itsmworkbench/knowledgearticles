@@ -1,0 +1,37 @@
+{
+  "template":    "typescript",
+  "name":        "@itsmworkbench/knowledgearticles",
+  "description": "cli for indexer",
+  "packageJson": {
+    "dependencies":    {
+      "cheerio": "^1.0.0-rc.12",
+      "@laoban/utils":              "1.4.51",
+      "@laoban/filesops-node":      "1.4.51",
+      "@laoban/variables":          "1.4.51",
+      "@itsmworkbench/utils":       "${properties.itsmworkbench}",
+      "@itsmworkbench/commander12": "${properties.itsmworkbench}",
+      "@itsmworkbench/cli":         "${properties.itsmworkbench}",
+      "@itsmworkbench/jsyaml":      "${properties.itsmworkbench}"
+    },
+    "devDependencies": {
+      "@types/cheerio": "^0.22.35"
+    },
+    "browser":         {
+      "child_process": false
+    },
+    "bin":             {
+      "knowledgearticles": "dist/index.js"
+    }
+  },
+  "links":       [
+    "@itsmworkbench/fileutils",
+    "@enterprise_search/openai",
+
+
+  ],
+  "guards":      {
+    "compile": true,
+    "publish": true,
+    "test":    true
+  }
+}

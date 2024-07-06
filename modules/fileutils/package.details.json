@@ -1,0 +1,18 @@
+{
+  "template":    "typescript",
+  "name":        "@itsmworkbench/fileutils",
+  "description": "fileutils for indexer",
+  "packageJson": {
+    "dependencies":    {
+    },
+    "devDependencies": {}
+  },
+  "links":       [
+    "@enterprise_search/kleislis"
+  ],
+  "guards":      {
+    "compile": true,
+    "publish": true,
+    "test":    true
+  }
+}

@@ -1,0 +1,69 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta name="pdf:PDFVersion" content="1.4" />
+<meta name="pdf:docinfo:title" content="itms 1" />
+<meta name="pdf:hasXFA" content="false" />
+<meta name="access_permission:modify_annotations" content="true" />
+<meta name="access_permission:can_print_degraded" content="true" />
+<meta name="tika_batch_fs:relative_path" content="itms 1.pdf" />
+<meta name="dc:format" content="application/pdf; version=1.4" />
+<meta name="access_permission:fill_in_form" content="true" />
+<meta name="pdf:hasCollection" content="false" />
+<meta name="pdf:encrypted" content="false" />
+<meta name="dc:title" content="itms 1" />
+<meta name="Content-Length" content="43715" />
+<meta name="X-TIKA:digest:MD5" content="d94796fa1a40a89022ab6e12838fcb28" />
+<meta name="pdf:hasMarkedContent" content="false" />
+<meta name="Content-Type" content="application/pdf" />
+<meta name="pdf:producer" content="Skia/PDF m128 Google Docs Renderer" />
+<meta name="access_permission:extract_for_accessibility" content="true" />
+<meta name="access_permission:assemble_document" content="true" />
+<meta name="xmpTPg:NPages" content="1" />
+<meta name="resourceName" content="itms 1.pdf" />
+<meta name="pdf:hasXMP" content="false" />
+<meta name="access_permission:extract_content" content="true" />
+<meta name="access_permission:can_print" content="true" />
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.DefaultParser" />
+<meta name="X-TIKA:Parsed-By" content="org.apache.tika.parser.pdf.PDFParser" />
+<meta name="tika:file_ext" content="pdf" />
+<meta name="access_permission:can_modify" content="true" />
+<meta name="pdf:docinfo:producer" content="Skia/PDF m128 Google Docs Renderer" />
+<title>itms 1</title>
+</head>
+<body><div class="page"><p />
+<p>Issue summary:
+● Received ale return and it is close on WMS but it
+</p>
+<p>has not reached SAP.
+● Shipment not interfaced to Sales
+● Condition: Shipment should be ale return type.
+Resolution:
+● select * from ale br, ord_event_ot oe where
+</p>
+<p>br.ORD_SEQ_ID = oe.ORD_SEQ_ID
+and\noe.ORD_SEQ_ID in ('order sequence deails
+from the email/get it by using the shipment');
+</p>
+<p>● update ale_rtrn_authn_ot set
+ale_rtrn_authn_stat_cd = 2, last_mod_logon_id =
+'give your id' where ale_rtrn_authn_seq_id in (ale
+return seq id from above query);
+</p>
+<p>● select * from event_typ_defn where
+EVENT_TYP_NM = 'IF043';
+</p>
+<p>● select * from ord_event_ot where
+\nEVENT_TYP_SEQ_ID in ('Sequence id from the
+event type definition table') and ORD_SEQ_ID in
+('get the order sequence ids from the order table') ;
+</p>
+<p>● delete from ord_event_ot where ORD_SEQ_ID in
+('provide the order sequence id details from the
+above query') and EVENT_TYP_SEQ_ID =
+'Sequence id from the event type definition';
+</p>
+<p>● Retrigger the job FFF041 &lt;jms&gt;FFF041 M
+12-19-2014-00:00:00 0 NWK &lt;/jms&gt;</p>
+<p />
+</div>
+</body></html>
