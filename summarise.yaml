@@ -1,9 +1,9 @@
 directories:
-  pdfs: knowledgearticles/pdfs
+  inputs: knowledgearticles/inputs
   tika: knowledgearticles/tika
   html: knowledgearticles/html
   text: knowledgearticles/text
-  summary: knowledgearticles/summarise
+  summary: knowledgearticles/summary
 
 tika:
   type: jar

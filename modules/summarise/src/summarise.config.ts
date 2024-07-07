@@ -1,6 +1,8 @@
 import { RetryPolicyConfig } from "@summarisation/kleislis";
 import { ValidateFn } from "@itsmworkbench/cli";
 import { ErrorsAnd, NameAnd } from "@laoban/utils";
+import { Throttling } from "@summarisation/kleislis/src/throttling";
+import { defaultRetryPolicy, noRetryPolicy } from "@summarisation/kleislis/src/retry";
 
 export type SummariseConfig = {
   directories: SummariseDirectories
@@ -29,7 +31,7 @@ export type SummariseTika = {
   jar: string
 }
 export type SummariseDirectories = {
-  pdfs: string
+  inputs: string
   tika: string
   html: string
   text: string
@@ -47,6 +49,14 @@ export type SummariseNonfunctionals = {
   concurrent: number
   retry: RetryPolicyConfig
 }
+export function configToThrottling ( config: SummariseNonfunctionals ): Throttling {
+  return {
+    tokensPer100ms: config.throttlingPerHour / 360000,
+    max: config.throttlingPerHour,
+    current: config.throttlingPerHour
+  }
+}
+
 export type SummariseSchema = {
   type: 'inline'
   value: any
@@ -60,7 +70,7 @@ function validateNeeded ( s: any, name: string, type: string = 'string' ): strin
 function validateDirectory ( directories: SummariseDirectories ): string[] {
   if ( typeof directories !== 'object' ) return [ 'Directories is not an object' ]
   const errors: string[] = []
-  errors.push ( ...validateNeeded ( directories.pdfs, 'directories.pdfs' ) )
+  errors.push ( ...validateNeeded ( directories.inputs, 'directories.inputs' ) )
   errors.push ( ...validateNeeded ( directories.tika, 'directories.tika' ) )
   errors.push ( ...validateNeeded ( directories.text, 'directories.text' ) )
   errors.push ( ...validateNeeded ( directories.html, 'directories.html' ) )

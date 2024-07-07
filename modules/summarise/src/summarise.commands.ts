@@ -4,16 +4,19 @@ import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdC
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
-import { SummariseConfig } from "./summarise.config";
+import { configToThrottling, SummariseConfig } from "./summarise.config";
 import { simpleTemplate } from "@itsmworkbench/utils";
 import { NameAnd } from "@laoban/utils";
 import path from "node:path";
+import { withRetry } from "@summarisation/kleislis/src/retry";
+import { startThrottling, stopThrottling, Throttling, withThrottle } from "@summarisation/kleislis/src/throttling";
+import { Task, withConcurrencyLimit } from "@summarisation/kleislis/src/concurrency.limiter";
 
 
-function pdfsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
+function inputsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `tika `, opts )
-    const { pdfs, tika } = tc.config.directories
+    const { inputs, tika } = tc.config.directories
     const { jar } = tc.config.tika
 
     if ( opts.clean ) await fs.promises.rm ( tika, { recursive: true } )
@@ -22,9 +25,9 @@ function pdfsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander
       debug: opts.debug === true,
       dryRun: opts.dryRun === true
     }
-    const inToOutName = inputToOutputFileName ( pdfs, tika, { newFileNameFn: changeExtension ( '.json' ) } )
+    const inToOutName = inputToOutputFileName ( inputs, tika, { newFileNameFn: changeExtension ( '.json' ) } )
 
-    console.log ( 'made tika files', await executeRecursivelyCmdChanges ( tc.context.currentDirectory, pdfs, dir => {
+    console.log ( 'made tika files', await executeRecursivelyCmdChanges ( tc.context.currentDirectory, inputs, dir => {
       let outDir = inToOutName ( dir );
       return `java -jar ${jar} -i ${dir} -o ${outDir} --jsonRecursive`;
     }, config ) )
@@ -39,10 +42,10 @@ export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Comma
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
-    action: pdfsAction ( tc )
+    action: inputsAction ( tc )
   }
 }
-function addTikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
+function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `html `, opts )
     const { tika, html } = tc.config.directories
@@ -77,7 +80,7 @@ export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommande
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
-    action: addTikaAction ( tc )
+    action: tikaAction ( tc )
   }
 }
 
@@ -137,7 +140,8 @@ function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander
 
     const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model ) )
 
-    console.log ( 'made summary files', await transformFilesIfShaChanged ( async ( f, sha ) => {
+
+    let transformOne = async ( f: string, sha: string ) => {
       const content = simpleTemplate ( tc.config.prompt, { knowledgeArticle: f } )
       let prompt: Message[] = [ { role: 'system', content } ];
       if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
@@ -146,7 +150,17 @@ function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander
       let chosen = choices.map ( m => m.content ).join ( '\n' );
       const json = JSON.parse ( chosen )
       return JSON.stringify ( { sha, ...json }, null, 2 )
-    }, config ) ( text, summary ) )
+    };
+    const retry = tc.config.nonfunctionals.retry
+    const throttling: Throttling = configToThrottling ( tc.config.nonfunctionals )
+    const queue: Task<any>[] = [];
+    const withNfcs = withRetry ( retry, withThrottle ( throttling, withConcurrencyLimit ( tc.config.nonfunctionals.concurrent, queue, transformOne ) ) )
+    startThrottling ( throttling )
+    try {
+      console.log ( 'made summary files', await transformFilesIfShaChanged ( transformOne, config ) ( text, summary ) )
+    } finally {
+      stopThrottling ( throttling )
+    }
   };
 }
 export function addTextCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
@@ -169,16 +183,55 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
     options: {
       '--clean': { description: 'Delete the output file directories at the start' },
       '--debug': { description: 'Show debug information' },
+      '--noReport': { description: `Don't make a report` },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: async ( c, opts ) => {
-      await pdfsAction ( tc ) ( c, opts )
+      await inputsAction ( tc ) ( c, opts )
+      await tikaAction ( tc ) ( c, opts )
       await htmlAction ( tc ) ( c, opts )
       await textAction ( tc ) ( c, opts )
+      if ( !opts.noReport ) await reportAction ( tc ) ( c, opts )
     }
   }
 }
 
+function reportAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
+  return async ( c, opts ) => {
+    const fields = tc.config.report.fields
+    const result: NameAnd<any> = {}
+    for ( const category of tc.config.report.categories ) {
+      result[ category ] = {}
+      for ( const [ field, fieldConfig ] of Object.entries ( fields ) ) {
+        if ( fieldConfig.type === 'number' ) result[ category ][ field ] = 0
+        else if ( fieldConfig.type === 'enum' ) result[ category ][ field ] = Object.fromEntries ( fieldConfig.enum.map ( e => ([ e, 0 ]) ) )
+      }
+    }
+    const errors: NameAnd<string[]> = {}
+    for await ( const file of getFilesRecursively ( tc.config.directories.summary ) ) {
+      try {
+        const json = JSON.parse ( await fs.promises.readFile ( path.join ( tc.context.currentDirectory, file ), 'utf-8' ) )
+        for ( const category of tc.config.report.categories )
+          for ( const [ field, fieldConfig ] of Object.entries ( fields ) ) {
+            let value = json[ category ]?.[ field ];
+            if ( opts.debug ) console.log ( file, 'field', field, fieldConfig.type, value )
+            if ( fieldConfig.type === 'enum' ) {
+              let oldValue = result[ category ]?.[ field ]?.[ value ] || 0;
+              result[ category ][ field ][ value ] = 1 + oldValue
+            }
+            if ( fieldConfig.type === 'number' ) {
+              const num = value
+              if ( typeof num !== 'number' ) errors[ file ] = [ ...errors[ file ] || [], `${field} is not a number` ]
+              result[ field ] += value || 0
+            }
+          }
+      } catch ( e: any ) {
+        errors[ file ] = [ ...errors[ file ] || [], e.message ]
+      }
+    }
+    console.log ( JSON.stringify ( { result, errors }, null, 2 ) )
+  };
+}
 export function addReportCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'report',
@@ -186,40 +239,7 @@ export function addReportCommand<Commander, Config> ( tc: ContextConfigAndComman
     options: {
       '--debug': { description: 'Show debug information' }
     },
-    action: async ( c, opts ) => {
-      const fields = tc.config.report.fields
-      const result: NameAnd<any> = {}
-      for ( const category of tc.config.report.categories ) {
-        result[ category ] = {}
-        for ( const [ field, fieldConfig ] of Object.entries ( fields ) ) {
-          if ( fieldConfig.type === 'number' ) result[ category ][ field ] = 0
-          else if ( fieldConfig.type === 'enum' ) result[ category ][ field ] = Object.fromEntries ( fieldConfig.enum.map ( e => ([ e, 0 ]) ) )
-        }
-      }
-      const errors: NameAnd<string[]> = {}
-      for await ( const file of getFilesRecursively ( tc.config.directories.summary ) ) {
-        try {
-          const json = JSON.parse ( await fs.promises.readFile ( path.join ( tc.context.currentDirectory, file ), 'utf-8' ) )
-          for ( const category of tc.config.report.categories )
-            for ( const [ field, fieldConfig ] of Object.entries ( fields ) ) {
-              let value = json[ category ]?.[ field ];
-              if ( opts.debug ) console.log ( file, 'field', field, fieldConfig.type, value )
-              if ( fieldConfig.type === 'enum' ) {
-                let oldValue = result[ category ]?.[ field ]?.[ value ] || 0;
-                result[ category ][ field ][ value ] = 1 + oldValue
-              }
-              if ( fieldConfig.type === 'number' ) {
-                const num = value
-                if ( typeof num !== 'number' ) errors[ file ] = [ ...errors[ file ] || [], `${field} is not a number` ]
-                result[ field ] += value || 0
-              }
-            }
-        } catch ( e: any ) {
-          errors[ file ] = [ ...errors[ file ] || [], e.message ]
-        }
-      }
-      console.log ( JSON.stringify ( { result, errors }, null, 2 ) )
-    }
+    action: reportAction ( tc )
   }
 }
 export function ksCommands<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig>,
