@@ -10,8 +10,8 @@
   "properties":     {
     "license":       "MIT",
     "repository":    "git@github.com:intellimaintain/intellimaintain.git",
-    "laobanVersion": "1.4.40",
-    "itsmworkbench": "0.3.6"
+    "laobanVersion": "1.4.51",
+    "itsmworkbench": "0.3.7"
   },
   "templates":      {
     "typescript":    "templates/typescript",

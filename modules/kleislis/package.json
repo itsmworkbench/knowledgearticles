@@ -1,5 +1,5 @@
 {
-  "name": "@summarisation/kleislis2",
+  "name": "@summarisation/kleislis",
   "description": "functions that have inputs, returns promises, and non functionals around them. Copied to make the summarisation application more self contained",
   "version": "0.0.1",
   "main": "dist/index",

@@ -1,6 +1,6 @@
 import { CliContext } from "@itsmworkbench/cli";
 import { AiClient } from "@summarisation/openai";
 
-export interface KAContext extends CliContext {
+export interface SummariseContext extends CliContext {
   openai: AiClient
 }

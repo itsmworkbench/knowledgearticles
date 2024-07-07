@@ -1,10 +1,10 @@
 {
   "template":    "typescript",
   "name":        "@summarisation/fileutils",
-  "description": "fileutils for indexer",
+  "description": "fileutils for summarisation",
   "packageJson": {
     "dependencies":    {
-      "@laoban/utils": "1.4.51"
+      "@laoban/utils": "${properties.laobanVersion}"
     },
     "devDependencies": {}
   },

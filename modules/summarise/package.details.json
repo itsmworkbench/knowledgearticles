@@ -1,14 +1,15 @@
 {
   "template":    "typescript",
-  "name":        "@summarisation/knowledgearticles",
-  "description": "cli for indexer",
+  "name":        "@summarisation/summarise",
+  "description": "cli for summariser",
   "packageJson": {
     "dependencies":    {
       "cheerio":                    "^1.0.0-rc.12",
-      "@laoban/utils":              "1.4.51",
-      "@laoban/filesops-node":      "1.4.51",
-      "@laoban/variables":          "1.4.51",
+      "@laoban/utils":              "${properties.laobanVersion}",
+      "@laoban/filesops-node":      "${properties.laobanVersion}",
+      "@laoban/variables":          "${properties.laobanVersion}",
       "@itsmworkbench/utils":       "${properties.itsmworkbench}",
+      "@itsmworkbench/config":       "${properties.itsmworkbench}",
       "@itsmworkbench/commander12": "${properties.itsmworkbench}",
       "@itsmworkbench/cli":         "${properties.itsmworkbench}",
       "@itsmworkbench/jsyaml":      "${properties.itsmworkbench}"
@@ -20,7 +21,7 @@
       "child_process": false
     },
     "bin":             {
-      "summarisation": "dist/index.js"
+      "summarise": "dist/index.js"
     }
   },
   "links":       [

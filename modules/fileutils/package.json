@@ -1,6 +1,6 @@
 {
   "name": "@summarisation/fileutils",
-  "description": "fileutils for indexer",
+  "description": "fileutils for summarisation",
   "version": "0.0.1",
   "main": "dist/index",
   "types": "dist/index",

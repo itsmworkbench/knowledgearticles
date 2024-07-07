@@ -1,11 +1,11 @@
 {
-  "name": "@summarisation/knowledgearticles",
-  "description": "cli for indexer",
+  "name": "@summarisation/summarise",
+  "description": "cli for summariser",
   "version": "0.0.1",
   "main": "dist/index",
   "types": "dist/index",
   "bin": {
-    "summarisation": "dist/index.js"
+    "summarise": "dist/index.js"
   },
   "browser": {
     "child_process": false
@@ -27,10 +27,11 @@
     "@laoban/utils": "1.4.51",
     "@laoban/filesops-node": "1.4.51",
     "@laoban/variables": "1.4.51",
-    "@itsmworkbench/utils": "0.3.6",
-    "@itsmworkbench/commander12": "0.3.6",
-    "@itsmworkbench/cli": "0.3.6",
-    "@itsmworkbench/jsyaml": "0.3.6",
+    "@itsmworkbench/utils": "0.3.7",
+    "@itsmworkbench/config": "0.3.7",
+    "@itsmworkbench/commander12": "0.3.7",
+    "@itsmworkbench/cli": "0.3.7",
+    "@itsmworkbench/jsyaml": "0.3.7",
     "@summarisation/fileutils": "0.0.1",
     "@summarisation/openai": "0.0.1",
     "debug": "^4.3.4"

@@ -352,47 +352,57 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@itsmworkbench/cli@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/cli/-/cli-0.3.6.tgz#dcecd5bf7d5ca03a57c54057816517b34a0ffe51"
-  integrity sha512-rO39rbVY+3lOPwcG0d/W5EVSUyfLWUc5biMAniF4LFpy8OtJTFfERXx4G+1FfOyNP8XWXHaSqmP+QBUO9zKIFQ==
+"@itsmworkbench/cli@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/cli/-/cli-0.3.7.tgz#993ec46d0bb219380375d9d12b49c1c03d62b362"
+  integrity sha512-0rcrpeIBSb2p/opeKIId2kAJW32JPZiiHesYV0s/OYZcHOUqYgxzUNoYzOPp4QOAvTmuoTMLdkz1NoWAuntXrw==
   dependencies:
-    "@itsmworkbench/utils" "0.3.6"
+    "@itsmworkbench/utils" "0.3.7"
     "@laoban/fileops" "1.4.51"
     "@laoban/utils" "1.4.51"
     debug "^4.3.4"
 
-"@itsmworkbench/commander12@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/commander12/-/commander12-0.3.6.tgz#c17ee2a20c2a484bf43fd341165ee1cce36aa0f1"
-  integrity sha512-EAP+omYRxXcj68HUeNSiE4YmpYkr2sfMrt5z4xTgxUAJccY5BlJ54G+JlvcZN0kiszPZxWvGsraP8V8HpILoFQ==
+"@itsmworkbench/commander12@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/commander12/-/commander12-0.3.7.tgz#54dfaa39ad4307661c954744cb5f8590cc189ed3"
+  integrity sha512-DneHz+Ka6mvCQkO6iKv5Pa6uGNZ3SDbTTrzNMxlsxemt6F4XEbENZJfQcOJfX27crWX1sCeTgBsKWMKikklKBQ==
   dependencies:
-    "@itsmworkbench/cli" "0.3.6"
+    "@itsmworkbench/cli" "0.3.7"
     commander "^v12.0.0"
     debug "^4.3.4"
 
-"@itsmworkbench/jsyaml@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/jsyaml/-/jsyaml-0.3.6.tgz#b99b9bb69912faef7924a09960c53b091a4996a7"
-  integrity sha512-gDvRJnObB+klf3RhMfFKmQab3IgIfMFZom4N/JD4jFpTTVV58Hpia5s9Lhxr99ltefPW8/KIhp2B+l0Qdpa5hA==
+"@itsmworkbench/config@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/config/-/config-0.3.7.tgz#0ec49b1799cf39d4910db5c8302421e74e4bc36b"
+  integrity sha512-vvKy+2tOfdR62J64v+nlLKYy3ychFJT/UYSFbAOM/0Nw/9jJdbaCabMNjXWZcQ2n/t9mI/NwF3CgfJP4DAEx4A==
   dependencies:
-    "@itsmworkbench/yaml" "0.3.6"
+    "@itsmworkbench/cli" "0.3.7"
+    "@itsmworkbench/utils" "0.3.7"
+    "@laoban/utils" "1.4.51"
+    debug "^4.3.4"
+
+"@itsmworkbench/jsyaml@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/jsyaml/-/jsyaml-0.3.7.tgz#040f7ac117f65d759daa4b14a718403d7f612e95"
+  integrity sha512-VSkJh1l2LC4d+hFBblYi3JydS6ChGeIoMPo2PIe4a/IvdwpBTY41P5FlIEvPYWP4vRVrFE7gkPAb8WLSgETAyg==
+  dependencies:
+    "@itsmworkbench/yaml" "0.3.7"
     debug "^4.3.4"
     js-yaml "^4.1.0"
 
-"@itsmworkbench/utils@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/utils/-/utils-0.3.6.tgz#f6a68115128c213819551625f088c3b217d622a9"
-  integrity sha512-a8sq3tB0YPlwAhcDstU1899KBhfEteSPgSV7eGreHjE8g2mzp69qrMh1JuJJfg+woveZqXYbfmYVQ2Tza6/qqA==
+"@itsmworkbench/utils@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/utils/-/utils-0.3.7.tgz#76f5ea1d732b1bd0dd97f890df7430dd0e160bbd"
+  integrity sha512-/lOlw23IHcjFK+JWNXUGiz5eVLNVpeDLKPl2UlRinoDeOFb7m42tcEB6WjirWxefhjcfi5SDsLReUrDSRHUpYw==
   dependencies:
     "@focuson/lens" "1.44.3"
     debug "^4.3.4"
     node "^v14.4.0"
 
-"@itsmworkbench/yaml@0.3.6":
-  version "0.3.6"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/yaml/-/yaml-0.3.6.tgz#92e8c914e1783951c80c81ee57ae2dffd46955a1"
-  integrity sha512-waYeVetfOvh364bQk0A8varfiIxoTICnxahtujyX83xoKwMMVP8hsuEhfQuET0C66XZIAq9AqJm3Ux9pu49Pkw==
+"@itsmworkbench/yaml@0.3.7":
+  version "0.3.7"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/yaml/-/yaml-0.3.7.tgz#159622b6893047cfc60fe22c44c4c4568647edd7"
+  integrity sha512-TZo7LnuqNFotl5PuwZjwUuLzeTH95LjOqLJ3ZVJ0vfA/zVMBvsOeXMhxjbNIspM9htOKCSkjMxiss/xFd9Qr0w==
   dependencies:
     "@laoban/utils" "1.4.51"
     debug "^4.3.4"

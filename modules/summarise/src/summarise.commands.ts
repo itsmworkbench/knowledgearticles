@@ -1,5 +1,5 @@
 import { CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
-import { KAContext } from "./ka.context";
+import { SummariseContext } from "./summarise.context";
 import { changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, transformFiles, TransformFilesConfig } from "@summarisation/fileutils";
 import path from "node:path";
 import * as fs from "node:fs";
@@ -7,7 +7,7 @@ import * as cheerio from "cheerio";
 import { basePrompt, Message } from "@summarisation/openai";
 
 
-export function addTika<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, KAContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addTika<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'tika',
     description: `turn pdf files into text files using apache tika`,
@@ -37,7 +37,7 @@ export function addTika<Commander, Config, CleanConfig> ( tc: ContextConfigAndCo
     }
   }
 }
-export function addHtmlCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, KAContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addHtmlCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'html',
     description: `turn tika files to html files`,
@@ -66,7 +66,7 @@ export function addHtmlCommand<Commander, Config, CleanConfig> ( tc: ContextConf
   }
 }
 
-export function addTextCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, KAContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addTextCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'text',
     description: `turn html files to text`,
@@ -97,7 +97,7 @@ export function addTextCommand<Commander, Config, CleanConfig> ( tc: ContextConf
 }
 
 
-export function addSummaryCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, KAContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addSummaryCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'summary',
     description: `turn text files to summary`,
@@ -132,8 +132,8 @@ export function addSummaryCommand<Commander, Config, CleanConfig> ( tc: ContextC
 }
 
 
-export function ksCommands<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, KAContext, Config, CleanConfig>,
-                                                             cliTc: CliTc<Commander, KAContext, Config, CleanConfig> ) {
+export function ksCommands<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig>,
+                                                             cliTc: CliTc<Commander, SummariseContext, Config, CleanConfig> ) {
   cliTc.addCommands ( tc, [
     addTika ( tc ),
     addHtmlCommand ( tc ),
