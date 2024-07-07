@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/summarise",
   "description": "cli for summariser",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "main": "dist/index",
   "types": "dist/index",
   "bin": {
@@ -32,9 +32,9 @@
     "@itsmworkbench/commander12": "0.3.7",
     "@itsmworkbench/cli": "0.3.7",
     "@itsmworkbench/jsyaml": "0.3.7",
-    "@summarisation/fileutils": "0.2.4",
-    "@summarisation/kleislis": "0.2.4",
-    "@summarisation/openai": "0.2.4",
+    "@summarisation/fileutils": "0.2.6",
+    "@summarisation/kleislis": "0.2.6",
+    "@summarisation/openai": "0.2.6",
     "debug": "^4.3.4"
   },
   "devDependencies": {
@@ -68,10 +68,12 @@
     "dist/src/"
   ],
   "keywords": [
-    "runbook"
+    "summarisation",
+    "GenerativeAi",
+    "AI"
   ],
   "license": "MIT",
-  "repository": "git@github.com:intellimaintain/intellimaintain.git",
+  "repository": "git@github.com:itsmworkbench/knowledgearticles.git",
   "scripts": {
     "test": "jest --config jest.config.json --env node",
     "test:watch": "npm run test -- --watch"

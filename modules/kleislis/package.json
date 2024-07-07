@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/kleislis",
   "description": "functions that have inputs, returns promises, and non functionals around them. Copied to make the summarisation application more self contained",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "main": "dist/index",
   "types": "dist/index",
   "browserslist": {
@@ -50,11 +50,9 @@
     "dist/index.d.ts",
     "dist/src/"
   ],
-  "keywords": [
-    "runbook"
-  ],
+  "keywords": [],
   "license": "MIT",
-  "repository": "git@github.com:intellimaintain/intellimaintain.git",
+  "repository": "git@github.com:itsmworkbench/knowledgearticles.git",
   "scripts": {
     "test": "jest --config jest.config.json --env node",
     "test:watch": "npm run test -- --watch"

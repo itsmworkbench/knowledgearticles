@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/openai",
   "description": "Client for openai",
-  "version": "0.2.4",
+  "version": "0.2.6",
   "main": "dist/index",
   "types": "dist/index",
   "browser": {
@@ -54,11 +54,9 @@
     "dist/index.d.ts",
     "dist/src/"
   ],
-  "keywords": [
-    "runbook"
-  ],
+  "keywords": [],
   "license": "MIT",
-  "repository": "git@github.com:intellimaintain/intellimaintain.git",
+  "repository": "git@github.com:itsmworkbench/knowledgearticles.git",
   "scripts": {
     "test": "jest --config jest.config.json --env node",
     "test:watch": "npm run test -- --watch"

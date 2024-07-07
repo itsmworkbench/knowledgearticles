@@ -20,6 +20,9 @@
     "browser":         {
       "child_process": false
     },
+    "keywords":        [
+      "summarisation", "GenerativeAi", "AI"
+    ],
     "bin":             {
       "summarise": "dist/index.js"
     }
