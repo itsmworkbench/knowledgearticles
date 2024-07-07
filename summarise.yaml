@@ -1,8 +1,13 @@
 directories:
-  input: knowledgeartices/pdfs
+  pdfs: knowledgearticles/pdfs
+  tika: knowledgearticles/tika
   html: knowledgearticles/html
   text: knowledgearticles/text
   summary: knowledgearticles/summarise
+
+tika:
+    type: jar
+    jar: tika-app-2.9.2.jar
 
 ai:
   type: openai

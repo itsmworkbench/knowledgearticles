@@ -5,12 +5,18 @@ import { ErrorsAnd } from "@laoban/utils";
 export type SummariseConfig = {
   directories: SummariseDirectories
   ai: SummariseAi
+  tika: SummariseTika
   nonfunctionals: SummariseNonfunctionals
   schema: SummariseSchema
   prompt: string
 }
+export type SummariseTika = {
+  type: 'jar'
+  jar: string
+}
 export type SummariseDirectories = {
-  input: string
+  pdfs: string
+  tika: string
   html: string
   text: string
   summary: string
@@ -40,7 +46,8 @@ function validateNeeded ( s: any, name: string, type: string = 'string' ): strin
 function validateDirectory ( directories: SummariseDirectories ): string[] {
   if ( typeof directories !== 'object' ) return [ 'Directories is not an object' ]
   const errors: string[] = []
-  errors.push ( ...validateNeeded ( directories.input, 'directories.input' ) )
+  errors.push ( ...validateNeeded ( directories.pdfs, 'directories.pdfs' ) )
+  errors.push ( ...validateNeeded ( directories.tika, 'directories.tika' ) )
   errors.push ( ...validateNeeded ( directories.text, 'directories.text' ) )
   errors.push ( ...validateNeeded ( directories.html, 'directories.html' ) )
   errors.push ( ...validateNeeded ( directories.summary, 'directories.summary' ) )
@@ -82,6 +89,14 @@ function validateSchema ( schema: SummariseSchema ) {
   if ( schema.value === undefined ) errors.push ( 'schema.value is not defined' )
   return errors
 }
+function validateTika ( tika: SummariseTika ) {
+  if ( typeof tika !== 'object' ) return [ 'Tika is not an object' ]
+  const errors: string[] = []
+  errors.push ( ...validateNeeded ( tika.type, 'tika.type' ) )
+  if ( errors.length === 0 && tika.type !== 'jar' ) return [ 'Invalid tika type. Currently only jar allowed' ]
+  errors.push ( ...validateNeeded ( tika.jar, 'tika.jar' ) )
+  return errors
+}
 export const validateConfig: ValidateFn<SummariseConfig, SummariseConfig> = ( s: SummariseConfig ): ErrorsAnd<SummariseConfig> => {
   const errors: string[] = []
   if ( typeof s !== 'object' ) {
@@ -90,6 +105,7 @@ export const validateConfig: ValidateFn<SummariseConfig, SummariseConfig> = ( s:
   }
   errors.push ( ...validateDirectory ( s.directories ) )
   errors.push ( ...validateAi ( s.ai ) )
+  errors.push ( ...validateTika ( s.tika ) )
   errors.push ( ...validateNonfunctionals ( s.nonfunctionals ) )
   errors.push ( ...validateSchema ( s.schema ) )
   errors.push ( ...validateNeeded ( s.prompt, 'prompt' ) )

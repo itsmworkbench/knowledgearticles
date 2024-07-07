@@ -5,54 +5,51 @@ import path from "node:path";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { basePrompt, Message } from "@summarisation/openai";
+import { SummariseConfig } from "./summarise.config";
 
 
-export function addTika<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
-    cmd: 'tika',
+    cmd: 'pdfs',
     description: `turn pdf files into text files using apache tika`,
     options: {
-      '-j, --jar <jar>': { description: 'The jar file to use', default: 'tika-app-2.9.2.jar' },
-      '-d, --dir <dir>': { description: 'The directory to look for the pdf files', default: 'knowledgearticles/pdfs' },
-      '-t, --target <target>': { description: 'The directory to put the text files', default: 'knowledgearticles/tika' },
       '--clean': { description: 'Delete the output file directory at the start' },
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: async ( _, opts ) => {
       if ( opts.debug ) console.log ( `tika `, opts )
-      const dir = opts.dir as string
-      const target = opts.target as string
-      if ( opts.clean ) await fs.promises.rm ( target, { recursive: true } )
-      const jar = path.resolve ( opts.jar as string )
+      const { pdfs, tika } = tc.config.directories
+      const { jar } = tc.config.tika
+
+      if ( opts.clean ) await fs.promises.rm ( tika, { recursive: true } )
+
       const config: ExecuteConfig = {
         debug: opts.debug === true,
         dryRun: opts.dryRun === true
       }
-      const inToOutName = inputToOutputFileName ( dir, target, { newFileNameFn: changeExtension ( '.json' ) } )
-      console.log ( await executeRecursivelyCmdChanges ( tc.context.currentDirectory, dir, dir => {
+      const inToOutName = inputToOutputFileName ( pdfs, tika, { newFileNameFn: changeExtension ( '.json' ) } )
+      console.log ( await executeRecursivelyCmdChanges ( tc.context.currentDirectory, pdfs, dir => {
         let outDir = inToOutName ( dir );
         return `java -jar ${jar} -i ${dir} -o ${outDir} --jsonRecursive`;
       }, config ) )
     }
   }
 }
-export function addHtmlCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
-    cmd: 'html',
+    cmd: 'tika',
     description: `turn tika files to html files`,
     options: {
-      '-d, --dir <dir>': { description: 'The directory to look for the tika files', default: 'knowledgearticles/tika' },
-      '-t, --target <target>': { description: 'The directory to put the html files', default: 'knowledgearticles/html' },
       '--clean': { description: 'Delete the output file directory at the start' },
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: async ( _, opts ) => {
       if ( opts.debug ) console.log ( `html `, opts )
-      const dir = opts.dir as string
-      const target = opts.target as string
-      if ( opts.clean ) await fs.promises.rm ( target, { recursive: true } )
+      const { tika, html } = tc.config.directories
+      if ( opts.clean ) await fs.promises.rm ( html, { recursive: true } )
+
       const config: TransformFilesConfig = {
         filter: ( file: string ) => file.endsWith ( '.json' ),
         newFileNameFn: changeExtension ( '.html' ),
@@ -61,27 +58,24 @@ export function addHtmlCommand<Commander, Config, CleanConfig> ( tc: ContextConf
       }
       console.log ( await transformFiles ( fn =>
           JSON.parse ( fn ).map ( page => page[ "X-TIKA:content" ] )
-        , config ) ( dir, target ) )
+        , config ) ( tika, html ) )
     }
   }
 }
 
-export function addTextCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addHtmlCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
-    cmd: 'text',
+    cmd: 'html',
     description: `turn html files to text`,
     options: {
-      '-d, --dir <dir>': { description: 'The directory to look for the html files', default: 'knowledgearticles/html' },
-      '-t, --target <target>': { description: 'The directory to put the text files', default: 'knowledgearticles/text' },
       '--clean': { description: 'Delete the output file directory at the start' },
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: async ( _, opts ) => {
       if ( opts.debug ) console.log ( `text `, opts )
-      const dir = opts.dir as string
-      const target = opts.target as string
-      if ( opts.clean ) await fs.promises.rm ( target, { recursive: true } )
+      const { html, text } = tc.config.directories
+      if ( opts.clean ) await fs.promises.rm ( text, { recursive: true } )
       const config: TransformFilesConfig = {
         filter: ( file: string ) => file.endsWith ( '.html' ),
         newFileNameFn: changeExtension ( '.txt' ),
@@ -91,28 +85,25 @@ export function addTextCommand<Commander, Config, CleanConfig> ( tc: ContextConf
       console.log ( await transformFiles ( async f => {
         let $ = cheerio.load ( f );
         return $ ( 'body' ).text ()
-      }, config ) ( dir, target ) )
+      }, config ) ( html, text ) )
     }
   }
 }
 
 
-export function addSummaryCommand<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig> ): CommandDetails<Commander> {
+export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'summary',
     description: `turn text files to summary`,
     options: {
-      '-d, --dir <dir>': { description: 'The directory to look for the text files', default: 'knowledgearticles/text' },
-      '-t, --target <target>': { description: 'The directory to put the summary files', default: 'knowledgearticles/summary' },
       '--clean': { description: 'Delete the output file directory at the start' },
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: async ( _, opts ) => {
       if ( opts.debug ) console.log ( `text `, opts )
-      const dir = opts.dir as string
-      const target = opts.target as string
-      if ( opts.clean ) await fs.promises.rm ( target, { recursive: true } )
+      const { text, summary } = tc.config.directories
+      if ( opts.clean ) await fs.promises.rm ( summary, { recursive: true } )
       const config: TransformFilesConfig = {
         filter: ( file: string ) => file.endsWith ( '.txt' ),
         newFileNameFn: changeExtension ( '.json' ),
@@ -126,18 +117,18 @@ export function addSummaryCommand<Commander, Config, CleanConfig> ( tc: ContextC
         let choices = await tc.context.openai ( prompt );
         let result = choices.map ( m => m.content ).join ( '\n' );
         return result
-      }, config ) ( dir, target ) )
+      }, config ) ( text, summary ) )
     }
   }
 }
 
 
-export function ksCommands<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, CleanConfig>,
-                                                             cliTc: CliTc<Commander, SummariseContext, Config, CleanConfig> ) {
+export function ksCommands<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig>,
+                                                cliTc: CliTc<Commander, SummariseContext, Config, SummariseConfig> ) {
   cliTc.addCommands ( tc, [
-    addTika ( tc ),
+    addPdfs ( tc ),
+    addTikaCommand ( tc ),
     addHtmlCommand ( tc ),
-    addTextCommand ( tc ),
     addSummaryCommand ( tc )
   ] )
 }
