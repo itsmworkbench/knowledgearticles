@@ -34,6 +34,12 @@ export async function* getFilesRecursively ( dir: string, filterFn?: ( name: str
   }
 }
 
+export async function mapAsyncG<T, T1> ( gen: AsyncGenerator<T>, fn: ( t: T ) => Promise<T1> ): Promise<T1[]> {
+  const res: Promise<T1>[] = []
+  for await ( const t of gen ) res.push ( fn ( t ) )
+  return Promise.all ( res )
+}
+
 export type TransformFilesConfig = {
   filter?: ( file: string ) => boolean
   includeOutput?: boolean
@@ -49,6 +55,13 @@ export type TranformFilesMetric = {
   writeCount: number
   failed: string[]
 }
+export function addMetrics ( metrics: TranformFilesMetric[] ): TranformFilesMetric {
+  return metrics.reduce ( ( acc, m ) => ({
+    readCount: acc.readCount + m.readCount,
+    writeCount: acc.writeCount + m.writeCount,
+    failed: [ ...acc.failed, ...m.failed ]
+  }), { readCount: 0, writeCount: 0, failed: [] } )
+}
 export type TranformFiles = ( inputDir: string, outputDir: string ) => Promise<TranformFilesMetric>
 
 export const inputToOutputFileName = ( inputDir: string, outputDir: string, config?: TransformFilesConfig ) => ( file: string ) => {
@@ -57,35 +70,37 @@ export const inputToOutputFileName = ( inputDir: string, outputDir: string, conf
   const outputFilePath = path.join ( outputDir, relativePath );
   return outputFilePath;
 };
-export const transformFiles = ( fn: ( s: string, oldOutput: string | undefined ) => Promise<string | undefined>, config: TransformFilesConfig = {} ): TranformFiles => {
+
+
+const transformOneFile = ( fn: ( s: string, oldOutput: string | undefined ) => Promise<string | undefined>, inputDir: string, outputDir: string, config: TransformFilesConfig ) => async ( file: string ) => {
   const { filter, includeOutput, debug, dryRun, newFileNameFn = (f => f) } = config
-  return async ( inputDir: string, outputDir: string ) => {
-    const inToOut = inputToOutputFileName ( inputDir, outputDir, config )
-    let readCount = 0
-    let writeCount = 0
-    let failed: string[] = []
-    for await ( const file of getFilesRecursively ( inputDir, filter ) ) {
-      try {
-        const content: string = await fs.readFile ( file, 'utf-8' );
-        const outputFilePath = inToOut ( file );
+  const metrics: TranformFilesMetric = { readCount: 0, writeCount: 0, failed: [] }
+  const inToOut = inputToOutputFileName ( inputDir, outputDir, config )
+  try {
+    const content: string = await fs.readFile ( file, 'utf-8' );
+    const outputFilePath = inToOut ( file );
+    const oldOutput = includeOutput ? await fs.readFile ( outputFilePath, 'utf-8' ).catch ( () => undefined ) : undefined;
+    if ( debug || dryRun ) console.log ( 'file', file, '=>', outputFilePath, 'oldExists', oldOutput !== undefined )
+    const newContent = await fn ( content, oldOutput );
 
-        const oldOutput = includeOutput ? await fs.readFile ( outputFilePath, 'utf-8' ).catch ( () => undefined ) : undefined;
-        if ( debug || dryRun ) console.log ( 'file', file, '=>', outputFilePath, 'oldExists', oldOutput !== undefined )
-        const newContent = await fn ( content, oldOutput );
-
-        if ( newContent && !dryRun ) {
-          const newDir = path.dirname ( outputFilePath );
-          await fs.mkdir ( newDir, { recursive: true } );
-          await fs.writeFile ( outputFilePath, newContent );
-          writeCount++;
-        }
-        readCount++;
-      } catch ( e ) {
-        console.error ( `Failed`, file, e )
-        failed.push ( file )
-      }
+    if ( newContent && !dryRun ) {
+      const newDir = path.dirname ( outputFilePath );
+      await fs.mkdir ( newDir, { recursive: true } );
+      await fs.writeFile ( outputFilePath, newContent );
+      metrics.writeCount++;
     }
-    return { readCount, writeCount, failed }
+    metrics.readCount++;
+  } catch ( e ) {
+    console.error ( `Failed`, file, e )
+    metrics.failed.push ( file )
+  }
+  return metrics
+};
+export const transformFiles = ( fn: ( s: string, oldOutput: string | undefined ) => Promise<string | undefined>, config: TransformFilesConfig = {} ): TranformFiles => {
+  const { filter } = config
+  return async ( inputDir: string, outputDir: string ) => {
+    const metrics = await mapAsyncG ( getFilesRecursively ( inputDir, filter ), transformOneFile ( fn, inputDir, outputDir, config ) )
+    return addMetrics ( metrics )
   };
 };
 
