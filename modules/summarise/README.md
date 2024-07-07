@@ -21,11 +21,9 @@ summarise report # gives a report on the summaries
 Using the information in `summarise.yaml` it will:
 
 * Read the documents in the `pdfs` directory
-* Using [Apache Tika](https://tika.apache.org/) it will extract the text from the documents
+* Using [Apache Tika](https://tika.apache.org/) it will extract the text from the documents into html
     * Note that since it is using apache tika it should handle many different types of documents. We use it with pdfs
-* Todo currently we mess this up a bit... we turn the json => html => text... but we need to merge the steps to handle
-  multiple pages
-* The html is turned into plain text
+* The html is turned into plain text using the cheerio library
 * The text is summarised using generative ai
 * The summaries are written to the `summaries` directory
 
@@ -45,8 +43,6 @@ This has a dramatic effect on the time and cost of large numbers of documents
   * Need to setup the `summarise.yaml` file
   * Need to download the apache tika jar
   * Really we should have an init command to do this
-* only works on one page documents
-    * Known issue and will be fixed soon by merging the html => text step
 * doesn't work behind a corporate proxy
     * this is because the openai api is called directly. This is a known issue and will be fixed soon
 
@@ -56,7 +52,6 @@ This has a dramatic effect on the time and cost of large numbers of documents
 directories:
   inputs: knowledgearticles/inputs
   tika: knowledgearticles/tika
-  html: knowledgearticles/html
   text: knowledgearticles/text
   summary: knowledgearticles/summary
 ```
@@ -66,7 +61,6 @@ This example is for knowledge articles. You can use your own values.
 * The inputs are where you should store your documents. You can store them in subdirectories if you want, and this is
   preserved in the other directories
 * tika is where the data extracted from the documents by Apache Tika is stored
-* html is where the html is stored... this will be deleted soon
 * text is where the plain text is stored
 * summary is where the summaries are stored
 
@@ -77,7 +71,7 @@ tika:
 ```
 
 This is how the application uses Apache Tika. At the moment
-you need to down load a jar from [Apache Tika](https://tika.apache.org/download.html) and put it
+you need to download a jar from [Apache Tika](https://tika.apache.org/download.html) and put it
 at the location specified in the `jar` field
 
 ```yaml

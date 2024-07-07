@@ -1,5 +1,4 @@
 import axios, { AxiosStatic } from "axios";
-import { NameAnd } from "@laoban/utils";
 
 
 export type Message = {

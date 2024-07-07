@@ -9,7 +9,7 @@
       "@laoban/filesops-node":      "${properties.laobanVersion}",
       "@laoban/variables":          "${properties.laobanVersion}",
       "@itsmworkbench/utils":       "${properties.itsmworkbench}",
-      "@itsmworkbench/config":       "${properties.itsmworkbench}",
+      "@itsmworkbench/config":      "${properties.itsmworkbench}",
       "@itsmworkbench/commander12": "${properties.itsmworkbench}",
       "@itsmworkbench/cli":         "${properties.itsmworkbench}",
       "@itsmworkbench/jsyaml":      "${properties.itsmworkbench}"
@@ -26,6 +26,7 @@
   },
   "links":       [
     "@summarisation/fileutils",
+    "@summarisation/kleislis",
     "@summarisation/openai"
   ],
   "guards":      {

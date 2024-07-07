@@ -1,7 +1,6 @@
 directories:
   inputs: knowledgearticles/inputs
   tika: knowledgearticles/tika
-  html: knowledgearticles/html
   text: knowledgearticles/text
   summary: knowledgearticles/summary
 

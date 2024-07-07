@@ -1,6 +1,6 @@
 import { ActionFn, CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
 import { SummariseContext } from "./summarise.context";
-import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, getFilesRecursively, inputToOutputFileName, TransformDirectoryIfShaChangedConfig, transformFiles, TransformFilesConfig, transformFilesIfShaChanged } from "@summarisation/fileutils";
+import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, getFilesRecursively, inputToOutputFileName, TransformDirectoryIfShaChangedConfig, transformFiles, transformFilesIfShaChanged } from "@summarisation/fileutils";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
@@ -8,9 +8,7 @@ import { configToThrottling, SummariseConfig } from "./summarise.config";
 import { simpleTemplate } from "@itsmworkbench/utils";
 import { NameAnd } from "@laoban/utils";
 import path from "node:path";
-import { withRetry } from "@summarisation/kleislis/src/retry";
-import { startThrottling, stopThrottling, Throttling, withThrottle } from "@summarisation/kleislis/src/throttling";
-import { Task, withConcurrencyLimit } from "@summarisation/kleislis/src/concurrency.limiter";
+import { startThrottling, stopThrottling, Task, Throttling, withConcurrencyLimit, withRetry, withThrottle } from "@summarisation/kleislis";
 
 
 function inputsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
@@ -33,10 +31,10 @@ function inputsAction<Commander, Config> ( tc: ContextConfigAndCommander<Command
     }, config ) )
   };
 }
-export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
+export function addInputsCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
-    cmd: 'pdfs',
-    description: `turn pdf files into text files using apache tika`,
+    cmd: 'inputs',
+    description: `turn pdf files into text files using apache tika. ${tc.config.directories.inputs} ==> ${tc.config.directories.tika}`,
     options: {
       '--clean': { description: 'Delete the output file directory at the start' },
       '--debug': { description: 'Show debug information' },
@@ -48,8 +46,8 @@ export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Comma
 function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `html `, opts )
-    const { tika, html } = tc.config.directories
-    if ( opts.clean ) await fs.promises.rm ( html, { recursive: true } )
+    const { tika, text } = tc.config.directories
+    if ( opts.clean ) await fs.promises.rm ( text, { recursive: true } )
 
     const digest = calculateSHA256
     const config: TransformDirectoryIfShaChangedConfig = {
@@ -62,55 +60,29 @@ function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander
         }
       },
       filter: ( file: string ) => file.endsWith ( '.json' ),
-      newFileNameFn: changeExtension ( '.html' ),
+      newFileNameFn: changeExtension ( '.txt' ),
       debug: opts.debug === true,
       dryRun: opts.dryRun === true
     }
-    console.log ( 'made html files', await transformFiles ( fn =>
-        JSON.parse ( fn ).map ( ( page: any ) => page[ "X-TIKA:content" ] )
-      , config ) ( tika, html ) )
+    console.log ( 'made html files', await transformFiles ( fn => JSON
+        .parse ( fn ).map ( ( page: any ) => {
+          let html = page[ "X-TIKA:content" ];
+          let $ = cheerio.load ( html );
+          return $ ( 'body' ).text ()
+        } )
+      , config ) ( tika, text ) )
   };
 }
 export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'tika',
-    description: `turn tika files to html files`,
+    description: `turn tika files to text files ${tc.config.directories.tika} ==> ${tc.config.directories.text}`,
     options: {
       '--clean': { description: 'Delete the output file directory at the start' },
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: tikaAction ( tc )
-  }
-}
-
-function htmlAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
-  return async ( _, opts ) => {
-    if ( opts.debug ) console.log ( `text `, opts )
-    const { html, text } = tc.config.directories
-    if ( opts.clean ) await fs.promises.rm ( text, { recursive: true } )
-    const config: TransformFilesConfig = {
-      filter: ( file: string ) => file.endsWith ( '.html' ),
-      newFileNameFn: changeExtension ( '.txt' ),
-      debug: opts.debug === true,
-      dryRun: opts.dryRun === true
-    }
-    console.log ( 'make text files', await transformFiles ( async f => {
-      let $ = cheerio.load ( f );
-      return $ ( 'body' ).text ()
-    }, config ) ( html, text ) )
-  };
-}
-export function addHtmlCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
-  return {
-    cmd: 'html',
-    description: `turn html files to text`,
-    options: {
-      '--clean': { description: 'Delete the output file directory at the start' },
-      '--debug': { description: 'Show debug information' },
-      '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
-    },
-    action: htmlAction ( tc )
   }
 }
 
@@ -189,7 +161,6 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
     action: async ( c, opts ) => {
       await inputsAction ( tc ) ( c, opts )
       await tikaAction ( tc ) ( c, opts )
-      await htmlAction ( tc ) ( c, opts )
       await textAction ( tc ) ( c, opts )
       if ( !opts.noReport ) await reportAction ( tc ) ( c, opts )
     }
@@ -245,9 +216,8 @@ export function addReportCommand<Commander, Config> ( tc: ContextConfigAndComman
 export function ksCommands<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig>,
                                                 cliTc: CliTc<Commander, SummariseContext, Config, SummariseConfig> ) {
   cliTc.addCommands ( tc, [
-    addPdfs ( tc ),
+    addInputsCommand ( tc ),
     addTikaCommand ( tc ),
-    addHtmlCommand ( tc ),
     addTextCommand ( tc ),
     addSummaryCommand ( tc ),
     addReportCommand ( tc )

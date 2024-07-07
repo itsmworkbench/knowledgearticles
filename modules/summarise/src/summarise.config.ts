@@ -1,8 +1,6 @@
-import { RetryPolicyConfig } from "@summarisation/kleislis";
+import { RetryPolicyConfig, Throttling } from "@summarisation/kleislis";
 import { ValidateFn } from "@itsmworkbench/cli";
 import { ErrorsAnd, NameAnd } from "@laoban/utils";
-import { Throttling } from "@summarisation/kleislis/src/throttling";
-import { defaultRetryPolicy, noRetryPolicy } from "@summarisation/kleislis/src/retry";
 
 export type SummariseConfig = {
   directories: SummariseDirectories
@@ -33,7 +31,6 @@ export type SummariseTika = {
 export type SummariseDirectories = {
   inputs: string
   tika: string
-  html: string
   text: string
   summary: string
 }
@@ -73,7 +70,6 @@ function validateDirectory ( directories: SummariseDirectories ): string[] {
   errors.push ( ...validateNeeded ( directories.inputs, 'directories.inputs' ) )
   errors.push ( ...validateNeeded ( directories.tika, 'directories.tika' ) )
   errors.push ( ...validateNeeded ( directories.text, 'directories.text' ) )
-  errors.push ( ...validateNeeded ( directories.html, 'directories.html' ) )
   errors.push ( ...validateNeeded ( directories.summary, 'directories.summary' ) )
   return errors
 }
