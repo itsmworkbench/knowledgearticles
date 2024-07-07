@@ -1,6 +1,6 @@
 import { RetryPolicyConfig } from "@summarisation/kleislis";
 import { ValidateFn } from "@itsmworkbench/cli";
-import { ErrorsAnd } from "@laoban/utils";
+import { ErrorsAnd, NameAnd } from "@laoban/utils";
 
 export type SummariseConfig = {
   directories: SummariseDirectories
@@ -8,8 +8,22 @@ export type SummariseConfig = {
   tika: SummariseTika
   nonfunctionals: SummariseNonfunctionals
   schema: SummariseSchema
+  report: SumariseReport
   prompt: string
 }
+export type SumariseReport = {
+  categories: string[]
+  fields: NameAnd<SumariseReportField>
+}
+export type SummariseReportEnum = {
+  type: 'enum'
+  enum: string[]
+}
+export type SummariseReportNumber = {
+  type: 'number'
+}
+export type SumariseReportField = SummariseReportEnum | SummariseReportNumber
+
 export type SummariseTika = {
   type: 'jar'
   jar: string
@@ -97,6 +111,22 @@ function validateTika ( tika: SummariseTika ) {
   errors.push ( ...validateNeeded ( tika.jar, 'tika.jar' ) )
   return errors
 }
+function validateReport ( report: SumariseReport ) {
+  if ( typeof report !== 'object' ) return [ 'Report is not an object' ]
+  const errors: string[] = []
+  if ( report.fields === undefined ) return [ 'report.fields is not defined' ]
+  if ( typeof report.fields !== 'object' ) return [ 'report.fields is not an object' ]
+  if ( report.categories === undefined ) return [ 'report.categories is not defined' ]
+  if ( !Array.isArray ( report.categories ) ) return [ 'report.categories is not an array' ]
+  for ( const [ key, value ] of Object.entries ( report.fields ) ) {
+    if ( typeof value !== 'object' ) return [ `report.fields.${key} is not an object` ]
+    if ( value.type === undefined ) return [ `report.fields.${key}.type is not defined` ]
+    if ( value.type !== 'enum' && value.type !== 'number' ) return [ `report.fields.${key}.type is not valid` ]
+    if ( value.type === 'enum' && value.enum === undefined ) return [ `report.fields.${key}.enum is not defined` ]
+    if ( value.type === 'enum' && !Array.isArray ( value.enum ) ) return [ `report.fields.${key}.enum is not an array` ]
+  }
+  return errors
+}
 export const validateConfig: ValidateFn<SummariseConfig, SummariseConfig> = ( s: SummariseConfig ): ErrorsAnd<SummariseConfig> => {
   const errors: string[] = []
   if ( typeof s !== 'object' ) {
@@ -109,6 +139,7 @@ export const validateConfig: ValidateFn<SummariseConfig, SummariseConfig> = ( s:
   errors.push ( ...validateNonfunctionals ( s.nonfunctionals ) )
   errors.push ( ...validateSchema ( s.schema ) )
   errors.push ( ...validateNeeded ( s.prompt, 'prompt' ) )
+  errors.push ( ...validateReport ( s.report ) )
   if ( errors.length > 0 ) return errors
   return s
 };

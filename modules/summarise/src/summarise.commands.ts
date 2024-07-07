@@ -1,14 +1,16 @@
-import { CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
+import { ActionFn, CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
 import { SummariseContext } from "./summarise.context";
-import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, TransformDirectoryIfShaChangedConfig, transformFiles, TransformFilesConfig, transformFilesIfShaChanged } from "@summarisation/fileutils";
+import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, getFilesRecursively, inputToOutputFileName, TransformDirectoryIfShaChangedConfig, transformFiles, TransformFilesConfig, transformFilesIfShaChanged } from "@summarisation/fileutils";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
 import { SummariseConfig } from "./summarise.config";
 import { simpleTemplate } from "@itsmworkbench/utils";
+import { NameAnd } from "@laoban/utils";
+import path from "node:path";
 
 
-function pdfsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ) {
+function pdfsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `tika `, opts )
     const { pdfs, tika } = tc.config.directories
@@ -40,7 +42,7 @@ export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Comma
     action: pdfsAction ( tc )
   }
 }
-function addTikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ) {
+function addTikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `html `, opts )
     const { tika, html } = tc.config.directories
@@ -79,7 +81,7 @@ export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommande
   }
 }
 
-function htmlAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ) {
+function htmlAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `text `, opts )
     const { html, text } = tc.config.directories
@@ -109,7 +111,7 @@ export function addHtmlCommand<Commander, Config> ( tc: ContextConfigAndCommande
   }
 }
 
-function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ) {
+function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `text `, opts )
     const { text, summary } = tc.config.directories
@@ -177,6 +179,49 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
   }
 }
 
+export function addReportCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
+  return {
+    cmd: 'report',
+    description: `Scans the summaries and reports on their quality `,
+    options: {
+      '--debug': { description: 'Show debug information' }
+    },
+    action: async ( c, opts ) => {
+      const fields = tc.config.report.fields
+      const result: NameAnd<any> = {}
+      for ( const category of tc.config.report.categories ) {
+        result[ category ] = {}
+        for ( const [ field, fieldConfig ] of Object.entries ( fields ) ) {
+          if ( fieldConfig.type === 'number' ) result[ category ][ field ] = 0
+          else if ( fieldConfig.type === 'enum' ) result[ category ][ field ] = Object.fromEntries ( fieldConfig.enum.map ( e => ([ e, 0 ]) ) )
+        }
+      }
+      const errors: NameAnd<string[]> = {}
+      for await ( const file of getFilesRecursively ( tc.config.directories.summary ) ) {
+        try {
+          const json = JSON.parse ( await fs.promises.readFile ( path.join ( tc.context.currentDirectory, file ), 'utf-8' ) )
+          for ( const category of tc.config.report.categories )
+            for ( const [ field, fieldConfig ] of Object.entries ( fields ) ) {
+              let value = json[ category ]?.[ field ];
+              if ( opts.debug ) console.log ( file, 'field', field, fieldConfig.type, value )
+              if ( fieldConfig.type === 'enum' ) {
+                let oldValue = result[ category ]?.[ field ]?.[ value ] || 0;
+                result[ category ][ field ][ value ] = 1 + oldValue
+              }
+              if ( fieldConfig.type === 'number' ) {
+                const num = value
+                if ( typeof num !== 'number' ) errors[ file ] = [ ...errors[ file ] || [], `${field} is not a number` ]
+                result[ field ] += value || 0
+              }
+            }
+        } catch ( e: any ) {
+          errors[ file ] = [ ...errors[ file ] || [], e.message ]
+        }
+      }
+      console.log ( JSON.stringify ( { result, errors }, null, 2 ) )
+    }
+  }
+}
 export function ksCommands<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig>,
                                                 cliTc: CliTc<Commander, SummariseContext, Config, SummariseConfig> ) {
   cliTc.addCommands ( tc, [
@@ -184,6 +229,7 @@ export function ksCommands<Commander, Config> ( tc: ContextConfigAndCommander<Co
     addTikaCommand ( tc ),
     addHtmlCommand ( tc ),
     addTextCommand ( tc ),
-    addSummaryCommand ( tc )
+    addSummaryCommand ( tc ),
+    addReportCommand ( tc )
   ] )
 }

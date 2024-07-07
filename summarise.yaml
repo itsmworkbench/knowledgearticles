@@ -6,8 +6,8 @@ directories:
   summary: knowledgearticles/summarise
 
 tika:
-    type: jar
-    jar: tika-app-2.9.2.jar
+  type: jar
+  jar: tika-app-2.9.2.jar
 
 ai:
   type: openai
@@ -26,9 +26,16 @@ nonfunctionals:
       - Not Found
 
 schema: # The json returned has to match this schema
-   type: inline
-   value: true
-
+  type: inline
+  value: true
+report:
+  categories: [ "description", "detection", "resolution", "validation", "summary" ]
+  fields:
+    value:
+      type: enum
+      enum: [ "Red", "Amber", "Green" ]
+#    example:
+#      type: number
 prompt: |
   I want you to evaluate a Knowledge Article for an ITSM issue using the following four areas
   
