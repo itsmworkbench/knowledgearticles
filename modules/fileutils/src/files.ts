@@ -2,7 +2,7 @@ import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
 
-async function* getChildDirectories ( dir: string, filterFn: ( name: string ) => boolean ) {
+async function* getChildDirectories ( dir: string, filterFn?: ( name: string ) => boolean ): AsyncGenerator<string> {
   const dirEntries = await fs.readdir ( dir, { withFileTypes: true } );
   for ( const entry of dirEntries.sort () ) {
     const fullPath = path.join ( dir, entry.name );
@@ -16,7 +16,8 @@ async function* getChildDirectories ( dir: string, filterFn: ( name: string ) =>
 }
 export async function* getDirectoriesRecursively ( dir: string, filterFn?: ( name: string ) => boolean ): AsyncGenerator<string> {
   yield dir
-  yield* await getChildDirectories ( dir, filterFn );
+  for await ( const child of getChildDirectories ( dir, filterFn ) )
+    yield child
 }
 
 export async function* getFilesRecursively ( dir: string, filterFn?: ( name: string ) => boolean ): AsyncGenerator<string> {
@@ -65,7 +66,7 @@ export function addMetrics ( metrics: TranformFilesMetric[] ): TranformFilesMetr
 export type TranformFiles = ( inputDir: string, outputDir: string ) => Promise<TranformFilesMetric>
 
 export const inputToOutputFileName = ( inputDir: string, outputDir: string, config?: TransformFilesConfig ) => ( file: string ) => {
-  const { newFileNameFn = f => f } = config || {}
+  const { newFileNameFn = ( f: string ) => f } = config || {}
   const relativePath = path.relative ( inputDir, newFileNameFn ( file ) );
   const outputFilePath = path.join ( outputDir, relativePath );
   return outputFilePath;
@@ -107,15 +108,15 @@ export const transformFiles = ( fn: ( s: string, oldOutput: string | undefined )
 
 export type TransformShaConfig = {
   digest?: Digest
-  getShaFromOutput: ( s: string ) => Promise<string>
+  getShaFromOutput: ( s: string ) => Promise<string | undefined>
 
 }
 export const transformIfShaChanged = ( fn: ( inp: string, sha: string, oldOutput: string | undefined ) => Promise<string | undefined>, config: TransformShaConfig ) => {
   const { digest = calculateSHA256, getShaFromOutput } = config;
   return async ( s: string, oldOutput: string | undefined ): Promise<string | undefined> => {
-    const sha = await getShaFromOutput ( oldOutput );
-    const oldSha: string | undefined = oldOutput && sha;
-    return await digest ( s ) === oldSha ? undefined : fn ( s, sha, oldOutput )
+    const sha: string = await digest ( s )
+    const oldSha: string | undefined = oldOutput && await getShaFromOutput ( oldOutput );
+    return sha === oldSha ? undefined : fn ( s, sha, oldOutput )
   };
 };
 

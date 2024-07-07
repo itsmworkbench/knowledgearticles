@@ -1,12 +1,13 @@
 #!/usr/bin/env node
 import { CliTc, CliTcFinder, fileConfig, makeCli } from "@itsmworkbench/cli";
 import { Commander12, commander12Tc } from "@itsmworkbench/commander12";
-import { hasErrors, reportErrors } from "@laoban/utils";
+import { hasErrors, NameAnd, reportErrors } from "@laoban/utils";
 import { fileOpsNode } from "@laoban/filesops-node";
 import { SummariseContext } from "./src/summarise.context";
 import { ksCommands } from "./src/summarise.commands";
 import { SummariseConfig, validateConfig } from "./src/summarise.config";
 import { jsYaml } from "@itsmworkbench/jsyaml";
+import { configCommands } from "@itsmworkbench/config";
 
 export function findVersion () {
   let packageJsonFileName = "../package.json";
@@ -24,7 +25,7 @@ let fileOps = fileOpsNode ();
 const makeContext = (): SummariseContext => ({
   version: findVersion (), name: 'summarise',
   currentDirectory: process.cwd (),
-  env: process.env,
+  env: process.env as NameAnd<string>,
   fileOps,
   args: process.argv
 });
@@ -53,7 +54,7 @@ makeCli<Commander12, SummariseContext, SummariseConfig, SummariseConfig> ( makeC
       process.exit ( 1 )
     }
     ksCommands ( commander, cliTc )
-    // cliTc.addSubCommand ( commander, configCommands ( commander ) as any )
+    cliTc.addSubCommand ( commander, configCommands ( commander ) as any )
     return await cliTc.execute ( commander.commander, process.argv )
   } ).catch ( e => {
   console.error ( e )

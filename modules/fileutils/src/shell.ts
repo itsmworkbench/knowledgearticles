@@ -39,13 +39,13 @@ export const executeScriptInShell: ExecuteInShellFn = ( cwd: string, cmd: string
       if ( stdErr === '' && (error === null || error.code === 0) )
         resolve ( { message: stdout.toString (), code: 0 } )
       else
-        resolve ( { message: stdout.toString (), error: stdErr.toString (), code: error?.code } )
+        resolve ( { message: stdout.toString (), error: stdErr.toString (), code: error?.code || 0 } )
     } )
   } );
 };
 
-export async function execute ( cwd: string, cmd: string, config?: ExecuteConfigWithShell ): Promise<ErrorsAnd<string>> {
-  const { encoding, executeInShell = executeScriptInShell, debug, dryRun } = config || {}
+export async function execute ( cwd: string, cmd: string, config: ExecuteConfigWithShell = {} ): Promise<ErrorsAnd<string>> {
+  const { encoding, executeInShell = executeScriptInShell, debug, dryRun } = config
   if ( debug || dryRun ) console.log ( 'execute ', cwd, cmd )
   if ( dryRun ) return []
   const res = await executeInShell ( cwd, cmd, config )
@@ -68,7 +68,7 @@ export async function executeRecursivelyInChildDirectories ( cwd: string, cmds: 
   }
 }
 
-export async function executeRecursivelyCmdChanges ( cwd: string, startDir: string,cmdFn: ( dir: string ) => string, config?: ExecuteConfigWithShell ) {
+export async function executeRecursivelyCmdChanges ( cwd: string, startDir: string, cmdFn: ( dir: string ) => string, config?: ExecuteConfigWithShell ) {
   let executed = 0
   let failed: string[] = []
   for await ( const dir of getDirectoriesRecursively ( startDir ) ) {

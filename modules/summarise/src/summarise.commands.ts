@@ -1,6 +1,6 @@
 import { CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
 import { SummariseContext } from "./summarise.context";
-import { changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, transformFiles, TransformFilesConfig } from "@summarisation/fileutils";
+import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, TransformDirectoryIfShaChangedConfig, transformFiles, TransformFilesConfig, transformFilesIfShaChanged } from "@summarisation/fileutils";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
@@ -29,6 +29,7 @@ export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Comma
         dryRun: opts.dryRun === true
       }
       const inToOutName = inputToOutputFileName ( pdfs, tika, { newFileNameFn: changeExtension ( '.json' ) } )
+
       console.log ( await executeRecursivelyCmdChanges ( tc.context.currentDirectory, pdfs, dir => {
         let outDir = inToOutName ( dir );
         return `java -jar ${jar} -i ${dir} -o ${outDir} --jsonRecursive`;
@@ -50,14 +51,23 @@ export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommande
       const { tika, html } = tc.config.directories
       if ( opts.clean ) await fs.promises.rm ( html, { recursive: true } )
 
-      const config: TransformFilesConfig = {
+      const digest = calculateSHA256
+      const config: TransformDirectoryIfShaChangedConfig = {
+        digest,
+        getShaFromOutput: async ( s: string ) => {
+          try {
+            return s.split ( '\n' )[ 0 ]//first line is the digest
+          } catch ( e ) {
+            return ''
+          }
+        },
         filter: ( file: string ) => file.endsWith ( '.json' ),
         newFileNameFn: changeExtension ( '.html' ),
         debug: opts.debug === true,
         dryRun: opts.dryRun === true
       }
       console.log ( await transformFiles ( fn =>
-          JSON.parse ( fn ).map ( page => page[ "X-TIKA:content" ] )
+          JSON.parse ( fn ).map ( ( page: any ) => page[ "X-TIKA:content" ] )
         , config ) ( tika, html ) )
     }
   }
@@ -90,7 +100,6 @@ export function addHtmlCommand<Commander, Config> ( tc: ContextConfigAndCommande
   }
 }
 
-
 export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
   return {
     cmd: 'summary',
@@ -104,7 +113,16 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
       if ( opts.debug ) console.log ( `text `, opts )
       const { text, summary } = tc.config.directories
       if ( opts.clean ) await fs.promises.rm ( summary, { recursive: true } )
-      const config: TransformFilesConfig = {
+      const digest = calculateSHA256
+      const config: TransformDirectoryIfShaChangedConfig = {
+        digest,
+        getShaFromOutput: async ( s: string ) => {
+          try {
+            return JSON.parse ( s ).sha
+          } catch ( e: any ) {
+            return undefined
+          }
+        },
         filter: ( file: string ) => file.endsWith ( '.txt' ),
         newFileNameFn: changeExtension ( '.json' ),
         debug: opts.debug === true,
@@ -116,14 +134,15 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
 
       const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model ) )
 
-      console.log ( await transformFiles ( async f => {
+      console.log ( await transformFilesIfShaChanged ( async ( f, sha ) => {
         const content = simpleTemplate ( tc.config.prompt, { knowledgeArticle: f } )
         let prompt: Message[] = [ { role: 'system', content } ];
         if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
         if ( opts.dryRun ) return undefined
         let choices = await openai ( prompt );
-        let result = choices.map ( m => m.content ).join ( '\n' );
-        return result
+        let chosen = choices.map ( m => m.content ).join ( '\n' );
+        const json = JSON.parse ( chosen )
+        return JSON.stringify ( { sha, ...json }, null, 2 )
       }, config ) ( text, summary ) )
     }
   }

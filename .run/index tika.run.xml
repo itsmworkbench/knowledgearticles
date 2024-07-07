@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="index tika" type="NodeJSConfigurationType" application-parameters="tika  " node-parameters="-r ts-node/register " path-to-js-file="$PROJECT_DIR$/modules/summarise/index.ts" working-dir="$PROJECT_DIR$/modules/summarise">
+  <configuration default="false" name="index tika" type="NodeJSConfigurationType" application-parameters="tika  " node-parameters="-r ts-node/register " path-to-js-file="modules/summarise/index.ts" working-dir="$PROJECT_DIR$">
     <method v="2" />
   </configuration>
 </component>

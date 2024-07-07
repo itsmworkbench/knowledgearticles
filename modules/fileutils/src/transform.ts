@@ -14,6 +14,3 @@ export function asJsonT ( jt: Transform<any> ): Transform<string> {
     }
   }
 }
-export function mapT<T> ( t: Transform<T> ): Transform<T[]> {
-  return ( s: T[] ) => s.map ( t )
-}
