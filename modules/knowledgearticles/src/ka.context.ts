@@ -1,5 +1,5 @@
-import { CliContext } from "@itsmworkbench/cli/dist/src/cli";
-import { AiClient } from "@enterprise_search/openai";
+import { CliContext } from "@itsmworkbench/cli";
+import { AiClient } from "@summarisation/openai";
 
 export interface KAContext extends CliContext {
   openai: AiClient

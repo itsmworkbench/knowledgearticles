@@ -1,5 +1,5 @@
 {
-  "name": "@itsmworkbench/fileutils",
+  "name": "@summarisation/fileutils",
   "description": "fileutils for indexer",
   "version": "0.0.1",
   "main": "dist/index",
@@ -17,7 +17,7 @@
     ]
   },
   "dependencies": {
-    "@enterprise_search/kleislis": "0.0.1",
+    "@laoban/utils": "1.4.51",
     "debug": "^4.3.4"
   },
   "devDependencies": {

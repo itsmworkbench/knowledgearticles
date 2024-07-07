@@ -1,15 +1,9 @@
 {
-  "name": "@summarisation/knowledgearticles",
-  "description": "cli for indexer",
+  "name": "@summarisation/kleislis2",
+  "description": "functions that have inputs, returns promises, and non functionals around them. Copied to make the summarisation application more self contained",
   "version": "0.0.1",
   "main": "dist/index",
   "types": "dist/index",
-  "bin": {
-    "summarisation": "dist/index.js"
-  },
-  "browser": {
-    "child_process": false
-  },
   "browserslist": {
     "development": [
       "last 1 chrome version",
@@ -23,20 +17,11 @@
     ]
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.12",
     "@laoban/utils": "1.4.51",
-    "@laoban/filesops-node": "1.4.51",
     "@laoban/variables": "1.4.51",
-    "@itsmworkbench/utils": "0.3.6",
-    "@itsmworkbench/commander12": "0.3.6",
-    "@itsmworkbench/cli": "0.3.6",
-    "@itsmworkbench/jsyaml": "0.3.6",
-    "@summarisation/fileutils": "0.0.1",
-    "@summarisation/openai": "0.0.1",
     "debug": "^4.3.4"
   },
   "devDependencies": {
-    "@types/cheerio": "^0.22.35",
     "typescript": "^5.2.2",
     "@testing-library/jest-dom": "^6.1.4",
     "@types/jest": "^29.0.0",

@@ -1,10 +1,10 @@
 {
   "template":    "typescript",
-  "name":        "@itsmworkbench/knowledgearticles",
+  "name":        "@summarisation/knowledgearticles",
   "description": "cli for indexer",
   "packageJson": {
     "dependencies":    {
-      "cheerio": "^1.0.0-rc.12",
+      "cheerio":                    "^1.0.0-rc.12",
       "@laoban/utils":              "1.4.51",
       "@laoban/filesops-node":      "1.4.51",
       "@laoban/variables":          "1.4.51",
@@ -20,14 +20,12 @@
       "child_process": false
     },
     "bin":             {
-      "knowledgearticles": "dist/index.js"
+      "summarisation": "dist/index.js"
     }
   },
   "links":       [
-    "@itsmworkbench/fileutils",
-    "@enterprise_search/openai",
-
-
+    "@summarisation/fileutils",
+    "@summarisation/openai"
   ],
   "guards":      {
     "compile": true,

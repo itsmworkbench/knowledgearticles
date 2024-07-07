@@ -320,60 +320,6 @@
   dependencies:
     "@jridgewell/trace-mapping" "0.3.9"
 
-"@enterprise_search/clients@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@enterprise_search/clients/-/clients-0.1.3.tgz#41b0b98c8ae832f449f8c9bc0d113f1f117c77eb"
-  integrity sha512-U4wNSGJcryBMtZqt9Ftmln2HQrYV+RiRhIXnvRfgKCGJMtMoALRJRM5y9k2NHhi18h9ef14vmjhJ2+FU+doI2A==
-  dependencies:
-    "@enterprise_search/indexconfig" "0.1.3"
-    "@enterprise_search/indexing" "0.1.3"
-    "@itsmworkbench/utils" "0.3.6"
-    "@laoban/utils" "1.4.51"
-    "@laoban/variables" "1.4.51"
-    debug "^4.3.4"
-
-"@enterprise_search/indexconfig@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@enterprise_search/indexconfig/-/indexconfig-0.1.3.tgz#58d5e1afb20206c200e3cfab32a5c90ea172c3c7"
-  integrity sha512-/LgZClXNH9BzYpaDFGxY16HQ0TLaA/aBsI6XkYHjE/tF6s4ZtJb6bQGXGEn97HqgBkqoAH48zME4qil6s12g0A==
-  dependencies:
-    "@enterprise_search/kleislis" "0.1.3"
-    "@itsmworkbench/utils" "0.3.6"
-    "@itsmworkbench/yaml" "0.3.6"
-    "@laoban/utils" "1.4.51"
-    "@laoban/variables" "1.4.51"
-    debug "^4.3.4"
-
-"@enterprise_search/indexing@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@enterprise_search/indexing/-/indexing-0.1.3.tgz#0ddf8f1a02f3be544bc8388173d653dea669c050"
-  integrity sha512-Z+vzK4wbiapQHFqkZCzXQZiiG8+V4xNXR+04Bi/nnQ/ldEKMIeQEvz/qRx4x3WT2et5Vv2+qxsJmeduXToVvQg==
-  dependencies:
-    "@enterprise_search/indexconfig" "0.1.3"
-    "@enterprise_search/kleislis" "0.1.3"
-    "@itsmworkbench/utils" "0.3.6"
-    "@laoban/utils" "1.4.51"
-    "@laoban/variables" "1.4.51"
-    debug "^4.3.4"
-
-"@enterprise_search/kleislis@0.0.1":
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/@enterprise_search/kleislis/-/kleislis-0.0.1.tgz#71b22f56d616bbf9c0492235808c379cd03bdc0f"
-  integrity sha512-O9QVcJLzzOJZoXI+8+IK9kdvMslkzfwt0EycwZATynnd+WAm1GLK14Z5TdIdxThkHA4mIMJqUpkHs4mJWSvOmg==
-  dependencies:
-    "@laoban/utils" "1.4.51"
-    "@laoban/variables" "1.4.51"
-    debug "^4.3.4"
-
-"@enterprise_search/kleislis@0.1.3":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@enterprise_search/kleislis/-/kleislis-0.1.3.tgz#1b3d141d40cb3aeecd11f9e315dad7ca7a718302"
-  integrity sha512-ZfGhHoj4ZaCZq+1RU48xkeYk6CBN+eN42rjWGeYdIFnvojrgXHTy4QUWw5pFOFtFlfObAjsaEv3YiUb82HaUvA==
-  dependencies:
-    "@laoban/utils" "1.4.51"
-    "@laoban/variables" "1.4.51"
-    debug "^4.3.4"
-
 "@focuson/lens@1.44.3":
   version "1.44.3"
   resolved "https://registry.yarnpkg.com/@focuson/lens/-/lens-1.44.3.tgz#9918146be0dec6458f92df31f1226e4bace83007"

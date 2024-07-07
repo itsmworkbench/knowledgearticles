@@ -1,7 +1,7 @@
 {
-  "name": "@enterprise_search/openai",
+  "name": "@summarisation/openai",
   "description": "Client for openai",
-  "version": "0.1.3",
+  "version": "0.0.1",
   "main": "dist/index",
   "types": "dist/index",
   "browser": {
@@ -23,8 +23,6 @@
     "@laoban/utils": "1.4.51",
     "@laoban/variables": "1.4.51",
     "axios": "^1.7.2",
-    "@itsmworkbench/utils": "0.3.6",
-    "@enterprise_search/clients": "0.1.3",
     "debug": "^4.3.4"
   },
   "devDependencies": {

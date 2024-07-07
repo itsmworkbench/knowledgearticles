@@ -1,0 +1,20 @@
+{
+  "template":    "typescript",
+  "name":        "@summarisation/kleislis2",
+  "description": "functions that have inputs, returns promises, and non functionals around them. Copied to make the summarisation application more self contained",
+  "packageJson": {
+    "dependencies":    {
+      "@laoban/utils":     "1.4.51",
+      "@laoban/variables": "1.4.51"
+    },
+    "devDependencies": {
+    }
+  },
+  "links":       [
+  ],
+  "guards":      {
+    "compile": true,
+    "publish": true,
+    "test":    false
+  }
+}

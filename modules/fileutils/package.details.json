@@ -1,14 +1,14 @@
 {
   "template":    "typescript",
-  "name":        "@itsmworkbench/fileutils",
+  "name":        "@summarisation/fileutils",
   "description": "fileutils for indexer",
   "packageJson": {
     "dependencies":    {
+      "@laoban/utils": "1.4.51"
     },
     "devDependencies": {}
   },
   "links":       [
-    "@enterprise_search/kleislis"
   ],
   "guards":      {
     "compile": true,

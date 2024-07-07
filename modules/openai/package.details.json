@@ -1,13 +1,12 @@
 {
   "template":    "typescript",
-  "name":        "@itsmworkbench/openai",
+  "name":        "@summarisation/openai",
   "description": "Client for openai",
   "packageJson": {
     "dependencies":    {
-      "@laoban/utils":        "1.4.51",
-      "@laoban/variables":    "1.4.51",
-      "axios":                "^1.7.2",
-      "@itsmworkbench/utils": "${properties.itsmworkbench}"
+      "@laoban/utils":     "1.4.51",
+      "@laoban/variables": "1.4.51",
+      "axios":             "^1.7.2"
     },
     "devDependencies": {},
     "browser":         {

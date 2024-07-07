@@ -1,10 +1,10 @@
 import { CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
 import { KAContext } from "./ka.context";
-import { changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, transformFiles, TransformFilesConfig } from "@itsmworkbench/fileutils";
+import { changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, transformFiles, TransformFilesConfig } from "@summarisation/fileutils";
 import path from "node:path";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
-import { basePrompt, defaultOpenAiConfig, Message, openAiClient } from "@enterprise_search/openai";
+import { basePrompt, Message } from "@summarisation/openai";
 
 
 export function addTika<Commander, Config, CleanConfig> ( tc: ContextConfigAndCommander<Commander, KAContext, Config, CleanConfig> ): CommandDetails<Commander> {
@@ -124,7 +124,7 @@ export function addSummaryCommand<Commander, Config, CleanConfig> ( tc: ContextC
         if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
         if ( opts.dryRun ) return undefined
         let choices = await tc.context.openai ( prompt );
-        let result = choices.map(m=>m.content).join ( '\n' );
+        let result = choices.map ( m => m.content ).join ( '\n' );
         return result
       }, config ) ( dir, target ) )
     }

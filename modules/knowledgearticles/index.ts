@@ -5,7 +5,7 @@ import { hasErrors, reportErrors } from "@laoban/utils";
 import { fileOpsNode } from "@laoban/filesops-node";
 import { KAContext } from "./src/ka.context";
 import { ksCommands } from "./src/ka.commands";
-import { defaultOpenAiConfig, openAiClient } from "@enterprise_search/openai";
+import { defaultOpenAiConfig, openAiClient } from "@summarisation/openai";
 
 export function findVersion () {
   let packageJsonFileName = "../package.json";
