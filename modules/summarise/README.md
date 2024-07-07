@@ -1,22 +1,51 @@
-# Installation
+# Summarise
 
-* Download the apache tika jar from [Apache Tika](https://tika.apache.org/download.html)
-* Download the npm package using `npm i -g summarisation/summarise`
-* Setup up the config file `summarise.yaml` in the directory you want to run the tool
-* Run the tool using `summarise summary` or `summarise report`
+This takes a whole load of documents, extracts the text from them, summarises the text and then gives a report on the
+summaries.
+
+* Uses Apache Tika to extract the text from the documents, so works with many files formats including pdfs, docx, xlsx,
+  pptx, and many more
+* Uses Openai to summarise the text
+* Produces aggregated reports on the summaries
+
+# Getting started
+
+## Installation
+
+* Download the jar from [Apache Tika](https://tika.apache.org/download.html)
+    * Make a note of where it is: you need to reference it in the summarise.yaml file
+* Make sure you have an openai token in an environment variable.
+    * If you use OPENAI_TOKEN you don't need to change the summarise.yaml file
 
 ```bash
-# Download the jar from [Apache Tika](https://tika.apache.org/download.html)
-# Make a note of where it is: you need to reference it in the summarise.yaml file
 npm i -g summarisation/summarise
-summarise --version # should print the version .. verifying the installation was correct
+summarise init # creates a summarise.yaml file in the current directory. 
+```
+Don't forget to update the summarise.yaml file with the location of the tika jar, and optionally the openai token
+environment variable name
+
+## Checking the installation
+
+```yaml
+summarise --version # should print the version .. verifying the installation was correct. Only works if there is a summary.yaml file 
 summarise --help # should print the help
 
-summarise summary # turns the documents => json => html => text => then summarises using generative ai and gives a report
-summarise report # gives a report on the summaries 
+summarise validate # checks the directories exist, the apache tika jar exists and connectivity with openai 
 ```
 
-# What it does
+## Using the summarise command
+
+```yaml
+summarise summary # turns the documents => json => html => text => then summarises using generative ai and gives a report
+summarise report # gives a report on the summaries
+
+  # The following commands are for debugging - they do each stage one at a time
+summarise tika # extracts the text from the documents
+summarise text # summarises the text
+summarise ai # summarises the text using the generative ai 
+```
+
+# How it works 
 
 Using the information in `summarise.yaml` it will:
 
@@ -39,15 +68,18 @@ This has a dramatic effect on the time and cost of large numbers of documents
 
 # Known issues
 
-* Bit hard to set up
-  * Need to setup the `summarise.yaml` file
-  * Need to download the apache tika jar
-  * Really we should have an init command to do this
 * doesn't work behind a corporate proxy
     * this is because the openai api is called directly. This is a known issue and will be fixed soon
+* Sends the whole text of the whole document...so only works on small documents because of token limits
+    * I am not sure what to do about this... we can summarise pages of the documents easily... but is that meaningful?
+    * For the primary use case this is for, the current behavior is acceptable
 
 # Configuration
 
+All configuration is done in the `summarise.yaml` file. This is a yaml file in the current directory (or a parent directory).
+It has the following sections
+
+## Directories
 ```yaml
 directories:
   inputs: knowledgearticles/inputs
@@ -64,6 +96,7 @@ This example is for knowledge articles. You can use your own values.
 * text is where the plain text is stored
 * summary is where the summaries are stored
 
+## Tika jar configuration
 ```yaml
 tika:
   type: jar
@@ -74,6 +107,7 @@ This is how the application uses Apache Tika. At the moment
 you need to download a jar from [Apache Tika](https://tika.apache.org/download.html) and put it
 at the location specified in the `jar` field
 
+## AI configuration
 ```yaml
 ai:
   type: openai
@@ -85,6 +119,7 @@ ai:
 This is the configuration of the generative ai. At the moment only openai is supported.
 You need to get an api key from openai and put it in the environment variable specified in the `token` field
 
+## Non functional configuration
 ```yaml
 nonfunctionals:
   throttlingPerHour: 1000 # 1000 requests per hour
@@ -108,17 +143,19 @@ These non functionals are used to interact with open ai. They are critical if yo
     * maximumAttempts: the maximum number of retries
     * nonRecoverableErrors: the errors that we should not retry on
 
-```yaml
+## Schema configuration
 
+```yaml
 schema: # The json returned has to match this schema
   type: inline
   value: true
 ```
 
-Currently not used. We should! This is to validate the json returned by the generative ai.
+Currently not used. We should! This will (in the future) validate the json returned by the generative ai.
 because of the retry logic it would retry until the number of retries is exhausted, or it is compliant
 This is useful because I have noticed that only occasionally the ai returns a json that is not compliant with the schema
 
+## Prompt configuration
 ```yaml
 prompt: |
   I want you to evaluate a Knowledge Article for an ITSM issue using the following four areas
@@ -144,6 +181,7 @@ the text of the document
 
 Also note that is pretty nice if you want to customise it: you don't need code, just change the prompt. Have fun playing
 
+## Report configuration
 ```yaml
 report:
   categories: [ "description", "detection", "resolution", "validation", "summary" ]
@@ -153,7 +191,7 @@ report:
       enum: [ "Red", "Amber", "Green" ]
 ```
 
-So this is the report for the example in the prompt.
+This is the report for the example in the prompt.
 
 * categories: the categories that are in the prompt
 * fields: the report fields. Here we only have one 'value'. If we change the prompt we might have a different enum or
@@ -166,3 +204,27 @@ The point of this is that
 * If you change from traffic lights to a number or 'good'/'bad' or 'compliant'/'non-compliant' you can change the report
   without changing the code
 
+# Troubleshooting
+
+* If you run the command `summarise <anything>`it should validate the `summarise.yaml` file has all needed values and is
+  formatted correctly. If
+  it doesn't please raise a bug about this
+* If you run the command `summarise validate` it should
+    * check the directories exist (only the input directory is required to run summarise)
+    * the apache tika jar exists
+    * connectivity with openai.
+* There are debug commands for each stage
+    * `summarise tika` extracts the text from the documents
+    * `summarise text` summarises the text
+    * `summarise ai` summarises the text using the generative ai
+    * Each of these commands has a `--debug` option which will print out the command that is run
+    * They also have a `--dry-run` option which will print out the command that is run but not run it
+
+Note that if you are behind a corporate proxy at the moment there is no safe option.
+
+* You can set the env variable NODE_TLS_REJECT_UNAUTHORIZED to the value 0
+    * This exposes you to man in the middle attacks and is unsafe. Please do not go to production with this
+    * Please read https://hayageek.com/disable-ssl-verification-in-node-js/ for more information
+      Fixing this is on the backlog
+
+If you have a problem please raise an issue. I am happy to help  

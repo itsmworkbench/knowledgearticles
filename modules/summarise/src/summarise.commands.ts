@@ -4,18 +4,29 @@ import { calculateSHA256, changeExtension, ExecuteConfig, executeRecursivelyCmdC
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
-import { configToThrottling, SummariseConfig } from "./summarise.config";
+import { configToThrottling, SummariseAi, SummariseConfig, SummariseDirectories, SummariseTika } from "./summarise.config";
 import { simpleTemplate } from "@itsmworkbench/utils";
 import { NameAnd } from "@laoban/utils";
 import path from "node:path";
 import { startThrottling, stopThrottling, Task, Throttling, withConcurrencyLimit, withRetry, withThrottle } from "@summarisation/kleislis";
 
+async function abortIfDirectoryDoesNotExist ( dir: string, message: string ) {
+  try {
+    await fs.promises.access ( dir )
+  } catch ( e ) {
+    console.error ( message )
+    process.exit ( 2 )
+  }
+
+}
 
 function inputsAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `tika `, opts )
+    await abortIfDirectoryDoesNotExist ( tc.config.directories.inputs, `inputs directory ${tc.config.directories.inputs} does not exist` )
     const { inputs, tika } = tc.config.directories
     const { jar } = tc.config.tika
+
 
     if ( opts.clean ) await fs.promises.rm ( tika, { recursive: true } )
 
@@ -46,6 +57,7 @@ export function addInputsCommand<Commander, Config> ( tc: ContextConfigAndComman
 function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `html `, opts )
+    await abortIfDirectoryDoesNotExist ( tc.config.directories.tika, `tika directory ${tc.config.directories.tika} does not exist` )
     const { tika, text } = tc.config.directories
     if ( opts.clean ) await fs.promises.rm ( text, { recursive: true } )
 
@@ -89,6 +101,7 @@ export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommande
 function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `text `, opts )
+    await abortIfDirectoryDoesNotExist ( tc.config.directories.text, `text directory ${tc.config.directories.text} does not exist` )
     const { text, summary } = tc.config.directories
     if ( opts.clean ) await fs.promises.rm ( summary, { recursive: true } )
     const digest = calculateSHA256
@@ -213,9 +226,62 @@ export function addReportCommand<Commander, Config> ( tc: ContextConfigAndComman
     action: reportAction ( tc )
   }
 }
+
+
+export function addValidateCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
+  return {
+    cmd: 'validate',
+    description: `Validates the configuration file`,
+    options: {},
+    action: async () => {
+      async function validateDirectories ( dirs: SummariseDirectories ) {
+        async function directory ( name: keyof SummariseDirectories, words: string ) {
+          try {
+            await fs.promises.access ( dirs[ name ] )
+            console.log ( `    ${name.padEnd ( 10 )} ${dirs[ name ].padEnd ( 30 )}  -- ok` )
+          } catch ( e ) {
+            console.log ( `    ${name.padEnd ( 10 )} ${dirs[ name ].padEnd ( 30 )}  -- ${words}` )
+          }
+        }
+        console.log ( 'Directories' )
+        await directory ( 'inputs', 'does not exist. This needs is where you put the data to be summarised, so nothing works without this' )
+        await directory ( 'tika', 'does not exist. It should be created when you `summarise summary`' )
+        await directory ( 'text', 'does not exist. It should be created when you `summarise summary`' )
+        await directory ( 'summary', 'does not exist. It should be created when you `summarise summary`' )
+      }
+      async function validateOpenAiConnectivity ( env: NameAnd<string>, ai: SummariseAi ) {
+        console.log ( 'ai' )
+        let problem = !env[ ai.token ];
+        if ( problem ) console.log ( `    ${ai.token} is not set in the environment` )
+        else console.log ( `    ${ai.token} is set in the environment` )
+        try {
+          await openAiClient ( defaultOpenAiConfig ( ai.url, env[ ai.token ], ai.model ) ) ( [ { role: 'system', content: 'test' } ] )
+          console.log ( `    ${ai.url} is reachable` )
+        } catch ( e: any ) {
+          console.log ( `    ${ai.url} is not reachable` )
+          console.log ( `   error is`, e )
+        }
+      }
+      await validateDirectories ( tc.config.directories )
+      async function validateTika ( tika: SummariseTika ) {
+        console.log ( 'tika' )
+        try {
+          await fs.promises.access ( tika.jar )
+          console.log ( `    ${tika.jar} exists` )
+        } catch ( e ) {
+          console.log ( `    ${tika.jar} does not exist` )
+        }
+      }
+      await validateTika ( tc.config.tika )
+      await validateOpenAiConnectivity ( tc.context.env, tc.config.ai )
+    }
+  }
+
+}
 export function ksCommands<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig>,
                                                 cliTc: CliTc<Commander, SummariseContext, Config, SummariseConfig> ) {
   cliTc.addCommands ( tc, [
+    addValidateCommand ( tc ),
     addInputsCommand ( tc ),
     addTikaCommand ( tc ),
     addTextCommand ( tc ),

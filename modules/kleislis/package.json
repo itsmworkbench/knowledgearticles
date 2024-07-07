@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/kleislis",
   "description": "functions that have inputs, returns promises, and non functionals around them. Copied to make the summarisation application more self contained",
-  "version": "0.2.0",
+  "version": "0.2.4",
   "main": "dist/index",
   "types": "dist/index",
   "browserslist": {
