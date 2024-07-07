@@ -44,3 +44,5 @@ prompt: |
   each section is an object having two fields called 'value' and 'summary'. The first is  a  traffic light value, and the second a summary of why that value was chosen.
   In addition create a final object called 'summary' with the same two fields which score the whole based on the traffic light values, and give a summary about the quality of the KEDB entry.
   
+  The knowledge article is
+  {knowledgeArticle}

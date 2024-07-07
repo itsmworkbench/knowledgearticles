@@ -5,6 +5,7 @@ import * as fs from "node:fs";
 import * as cheerio from "cheerio";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
 import { SummariseConfig } from "./summarise.config";
+import { simpleTemplate } from "@itsmworkbench/utils";
 
 
 export function addPdfs<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {
@@ -116,7 +117,8 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
       const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model ) )
 
       console.log ( await transformFiles ( async f => {
-        let prompt: Message[] = [ { role: 'system', content: `${tc.config.prompt}\n\nThe Knowledge Article is \n${f}` } ];
+        const content = simpleTemplate ( tc.config.prompt, { knowledgeArticle: f } )
+        let prompt: Message[] = [ { role: 'system', content } ];
         if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
         if ( opts.dryRun ) return undefined
         let choices = await openai ( prompt );
