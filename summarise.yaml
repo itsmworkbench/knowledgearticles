@@ -37,6 +37,8 @@ prompt: |
   and if we do, do we have enough information. For example with sql we need database connection details. For apis we need the urls
   resolution: Do we have a clear technical mechanism to resolve the issue. Same example issues (ie. sql needs conneciton issues)
   validation: Do we have a clear technical mechanism to validate that we have resolved the issue
+  
+  Note that traffic light colours are Red, Amber, Green
 
   The results will be used in RAG, so please provide a json object  with the name of the section (the description, detection, resolution and validation)
   each section is an object having two fields called 'value' and 'summary'. The first is  a  traffic light value, and the second a summary of why that value was chosen.

@@ -3,7 +3,7 @@ import { SummariseContext } from "./summarise.context";
 import { changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, transformFiles, TransformFilesConfig } from "@summarisation/fileutils";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
-import { basePrompt, defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
+import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
 import { SummariseConfig } from "./summarise.config";
 
 
@@ -116,7 +116,7 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
       const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model ) )
 
       console.log ( await transformFiles ( async f => {
-        let prompt: Message[] = [ { role: 'system', content: `${basePrompt}\n\nThe Knowledge Article is \n${f}` } ];
+        let prompt: Message[] = [ { role: 'system', content: `${tc.config.prompt}\n\nThe Knowledge Article is \n${f}` } ];
         if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
         if ( opts.dryRun ) return undefined
         let choices = await openai ( prompt );

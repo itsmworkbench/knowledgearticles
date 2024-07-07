@@ -5,7 +5,6 @@ import { hasErrors, reportErrors } from "@laoban/utils";
 import { fileOpsNode } from "@laoban/filesops-node";
 import { SummariseContext } from "./src/summarise.context";
 import { ksCommands } from "./src/summarise.commands";
-import { defaultOpenAiConfig, openAiClient } from "@summarisation/openai";
 import { SummariseConfig, validateConfig } from "./src/summarise.config";
 import { jsYaml } from "@itsmworkbench/jsyaml";
 
