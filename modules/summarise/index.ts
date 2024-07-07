@@ -27,8 +27,7 @@ const makeContext = (): SummariseContext => ({
   currentDirectory: process.cwd (),
   env: process.env,
   fileOps,
-  args: process.argv,
-  openai: openAiClient ( defaultOpenAiConfig )
+  args: process.argv
 });
 
 export const cliTc: CliTc<Commander12, SummariseContext, SummariseConfig, SummariseConfig> =

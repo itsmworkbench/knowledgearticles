@@ -1,10 +1,9 @@
 import { CliTc, CommandDetails, ContextConfigAndCommander } from "@itsmworkbench/cli";
 import { SummariseContext } from "./summarise.context";
 import { changeExtension, ExecuteConfig, executeRecursivelyCmdChanges, inputToOutputFileName, transformFiles, TransformFilesConfig } from "@summarisation/fileutils";
-import path from "node:path";
 import * as fs from "node:fs";
 import * as cheerio from "cheerio";
-import { basePrompt, Message } from "@summarisation/openai";
+import { basePrompt, defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
 import { SummariseConfig } from "./summarise.config";
 
 
@@ -110,11 +109,17 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
         debug: opts.debug === true,
         dryRun: opts.dryRun === true
       }
+      const { url, token, model } = tc.config.ai
+      const tokenValue = tc.context.env[ token ]
+      if ( !tokenValue ) throw new Error ( `Environment variable ${token} is required for open ai.` );
+
+      const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model ) )
+
       console.log ( await transformFiles ( async f => {
         let prompt: Message[] = [ { role: 'system', content: `${basePrompt}\n\nThe Knowledge Article is \n${f}` } ];
         if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
         if ( opts.dryRun ) return undefined
-        let choices = await tc.context.openai ( prompt );
+        let choices = await openai ( prompt );
         let result = choices.map ( m => m.content ).join ( '\n' );
         return result
       }, config ) ( text, summary ) )

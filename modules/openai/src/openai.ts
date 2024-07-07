@@ -1,4 +1,5 @@
 import axios, { AxiosStatic } from "axios";
+import { NameAnd } from "@laoban/utils";
 
 
 export type Message = {
@@ -60,10 +61,12 @@ each section is an object having two fields called 'value' and 'summary'. The fi
 In addition create a final object called 'summary' with the same two fields which score the whole based on the traffic light values, and give a summary about the quality of the KEDB entry.
 `
 
-export const defaultOpenAiConfig: OpenAiConfig = {
-  axios,
-  baseURL: process.env.OPENAI_URL,
-  Authorization: `Bearer ${process.env.OPENAI_TOKEN}`,
-  model: 'gpt-3.5-turbo'
+export const defaultOpenAiConfig = ( baseURL: string, token: string, model: string ): OpenAiConfig => {
+  return {
+    axios,
+    baseURL,
+    Authorization: `Bearer ${token}`,
+    model
+  };
 }
 
