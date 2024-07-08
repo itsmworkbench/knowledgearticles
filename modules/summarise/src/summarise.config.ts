@@ -1,7 +1,18 @@
-import { RetryPolicyConfig, Throttling } from "@summarisation/kleislis";
+import { RetryPolicyConfig, Throttling } from "@itsmworkbench/kleislis";
+
 import { ValidateFn } from "@itsmworkbench/cli";
 import { ErrorsAnd, NameAnd } from "@laoban/utils";
+import fs from "node:fs";
 
+export async function abortIfDirectoryDoesNotExist ( dir: string, message: string ) {
+  try {
+    await fs.promises.access ( dir )
+  } catch ( e ) {
+    console.error ( message )
+    process.exit ( 2 )
+  }
+
+}
 export type SummariseConfig = {
   directories: SummariseDirectories
   ai: SummariseAi
@@ -61,11 +72,11 @@ export type SummariseSchema = {
 
 function validateNeeded ( s: any, name: string, type: string = 'string' ): string[] {
   if ( !s ) return [ `${name} is not defined` ]
-  if ( typeof s !== type ) return [ `${name} is not a string` ]
+  if ( typeof s !== type ) return [ `${name} is not a ${type}` ]
   return []
 }
-function validateDirectory ( directories: SummariseDirectories ): string[] {
-  if ( typeof directories !== 'object' ) return [ 'Directories is not an object' ]
+export function validateDirectory ( directories: SummariseDirectories ): string[] {
+  if ( !directories || typeof directories !== 'object' ) return [ 'Directories is not an object' ]
   const errors: string[] = []
   errors.push ( ...validateNeeded ( directories.inputs, 'directories.inputs' ) )
   errors.push ( ...validateNeeded ( directories.tika, 'directories.tika' ) )
@@ -73,8 +84,8 @@ function validateDirectory ( directories: SummariseDirectories ): string[] {
   errors.push ( ...validateNeeded ( directories.summary, 'directories.summary' ) )
   return errors
 }
-function validateAi ( ai: SummariseAi ) {
-  if ( typeof ai !== 'object' ) return [ 'ai is not an object' ]
+export function validateAi ( ai: SummariseAi ) {
+  if ( !ai || typeof ai !== 'object' ) return [ 'ai is not an object' ]
   const errors: string[] = []
   errors.push ( ...validateNeeded ( ai.type, 'ai.type' ) )
   if ( errors.length === 0 && ai.type !== 'openai' ) return [ 'Invalid AI type. Currently only openai allowed' ]
@@ -83,8 +94,8 @@ function validateAi ( ai: SummariseAi ) {
   errors.push ( ...validateNeeded ( ai.token, 'ai.token' ) )
   return errors
 }
-function validateNonfunctionals ( nonfunctionals: SummariseNonfunctionals ) {
-  if ( typeof nonfunctionals !== 'object' ) return [ 'Nonfunctionals is not an object' ]
+export function validateNonfunctionals ( nonfunctionals: SummariseNonfunctionals ) {
+  if ( !nonfunctionals || typeof nonfunctionals !== 'object' ) return [ 'Nonfunctionals is not an object' ]
   const errors: string[] = []
   errors.push ( ...validateNeeded ( nonfunctionals.throttlingPerHour, 'nonfunctionals.throttlingPerHour', 'number' ) )
   errors.push ( ...validateNeeded ( nonfunctionals.concurrent, 'nonfunctionals.concurrent', 'number' ) )
@@ -101,24 +112,24 @@ function validateRetry ( retry: RetryPolicyConfig ) {
   errors.push ( ...validateNeeded ( retry.maximumAttempts, 'retry.maximumAttempts', 'number' ) )
   return errors
 }
-function validateSchema ( schema: SummariseSchema ) {
-  if ( typeof schema !== 'object' ) return [ 'Schema is not an object' ]
+export function validateSchema ( schema: SummariseSchema ) {
+  if ( !schema || typeof schema !== 'object' ) return [ 'Schema is not an object' ]
   const errors: string[] = []
   errors.push ( ...validateNeeded ( schema.type, 'schema.type' ) )
   if ( errors.length === 0 && schema.type !== 'inline' ) return [ 'Invalid schema type. Currently only inline allowed' ]
   if ( schema.value === undefined ) errors.push ( 'schema.value is not defined' )
   return errors
 }
-function validateTika ( tika: SummariseTika ) {
-  if ( typeof tika !== 'object' ) return [ 'Tika is not an object' ]
+export function validateTika ( tika: SummariseTika ) {
+  if ( !tika || typeof tika !== 'object' ) return [ 'Tika is not an object' ]
   const errors: string[] = []
   errors.push ( ...validateNeeded ( tika.type, 'tika.type' ) )
   if ( errors.length === 0 && tika.type !== 'jar' ) return [ 'Invalid tika type. Currently only jar allowed' ]
   errors.push ( ...validateNeeded ( tika.jar, 'tika.jar' ) )
   return errors
 }
-function validateReport ( report: SumariseReport ) {
-  if ( typeof report !== 'object' ) return [ 'Report is not an object' ]
+export function validateReport ( report: SumariseReport ) {
+  if ( !report || typeof report !== 'object' ) return [ 'Report is not an object' ]
   const errors: string[] = []
   if ( report.fields === undefined ) return [ 'report.fields is not defined' ]
   if ( typeof report.fields !== 'object' ) return [ 'report.fields is not an object' ]

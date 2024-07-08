@@ -79,13 +79,13 @@ describe ( 'files', () => {
     test ( 'should calculate SHA-256 hash of a string', async () => {
       const input = 'test string';
       const result = await calculateSHA256 ( input );
-      expect ( result ).toBe ( 'd5579c46dfcc7f18207013e65b44e4cb4e2c2298f4ac457ba8f82743f31e930b' );
+      expect ( result ).toBe ( '1VecRt_MfxggcBPmW0Tky04sIpj0rEV7qPgnQ_Mekws' );
     } );
 
     test ( 'should calculate SHA-256 hash of an empty string', async () => {
       const input = '';
       const result = await calculateSHA256 ( input );
-      expect ( result ).toBe ( 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' );
+      expect ( result ).toBe ( '47DEQpj8HBSa-_TImW-5JCeuQeRkm5NMpJWZG3hSuFU' );
     } );
   } );
 
@@ -120,7 +120,7 @@ describe ( 'files', () => {
 
       const result = await transform ( 'test input', 'different old output' );
 
-      expect ( result ).toBe ( 'test input/simple-sha-different old output/different old output' );
+      expect ( result ).toBe ( 'test input/simple-sha-test input/different old output' );
     } );
 
     test ( 'should call fn and return its result if there is no old output', async () => {
@@ -131,7 +131,7 @@ describe ( 'files', () => {
 
       const result = await transform ( 'test input', undefined );
 
-      expect ( result ).toBe ( 'test input//undefined' );
+      expect ( result ).toBe ( 'test input/simple-sha-test input/undefined' );
     } );
   } );
 } );

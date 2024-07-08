@@ -11,7 +11,7 @@
     "license":       "MIT",
     "repository":    "git@github.com:itsmworkbench/knowledgearticles.git",
     "laobanVersion": "1.4.51",
-    "itsmworkbench": "0.3.7"
+    "itsmworkbench": "0.3.8"
   },
   "templates":      {
     "typescript":    "templates/typescript",
@@ -22,30 +22,12 @@
     "NPM_TOKEN": ""
   },
   "scripts":        {
-    "ls-react": {
-      "description": "Lists all the react projects",
+    "coverage": {
+      "description": "Runs the tests with coverage",
       "commands":    [
         {
-          "guard":   "${packageDetails.guards.react}",
-          "command": "js:process.cwd()"
-        }
-      ]
-    },
-    "ls-build": {
-      "description": "Lists all the  projects that will be built",
-      "commands":    [
-        {
-          "guard":   "${packageDetails.guards.react}",
-          "command": "js:process.cwd()"
-        }
-      ]
-    },
-    "build":    {
-      "description": "Packages the react projects",
-      "commands":    [
-        {
-          "guard":   "${packageDetails.guards.react}",
-          "command": "yarn run build"
+          "guard":   "${packageDetails.guards.test}",
+          "command": "${packageManager} test --coverage"
         }
       ]
     }

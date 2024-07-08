@@ -4,12 +4,12 @@ import { Commander12, commander12Tc } from "@itsmworkbench/commander12";
 import { hasErrors, NameAnd, reportErrors } from "@laoban/utils";
 import { fileOpsNode } from "@laoban/filesops-node";
 import { SummariseContext } from "./src/summarise.context";
-import { ksCommands } from "./src/summarise.commands";
 import { SummariseConfig, validateConfig } from "./src/summarise.config";
 import { jsYaml } from "@itsmworkbench/jsyaml";
 import { configCommands } from "@itsmworkbench/config";
 import * as fs from "node:fs";
 import { defaultYaml } from "./src/default.yaml";
+import { addAllSummaryCommands } from "./src/commands/summarise.commands";
 
 if ( process.argv[ 2 ] === 'init' ) {
   console.log ( 'init' )
@@ -74,7 +74,7 @@ if ( process.argv[ 2 ] === 'init' ) {
         reportErrors ( commander )
         process.exit ( 1 )
       }
-      ksCommands ( commander, cliTc )
+      addAllSummaryCommands ( commander, cliTc )
       cliTc.addSubCommand ( commander, configCommands ( commander ) as any )
       return await cliTc.execute ( commander.commander, process.argv )
     } ).catch ( e => {

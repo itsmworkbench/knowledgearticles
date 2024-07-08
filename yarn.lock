@@ -352,57 +352,66 @@
   resolved "https://registry.yarnpkg.com/@istanbuljs/schema/-/schema-0.1.3.tgz#e45e384e4b8ec16bce2fd903af78450f6bf7ec98"
   integrity sha512-ZXRY4jNvVgSVQ8DL3LTcakaAtXwTVUxE81hslsyD2AtoXW/wVob10HkOJ1X/pAlcI7D+2YoZKg5do8G/w6RYgA==
 
-"@itsmworkbench/cli@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/cli/-/cli-0.3.7.tgz#993ec46d0bb219380375d9d12b49c1c03d62b362"
-  integrity sha512-0rcrpeIBSb2p/opeKIId2kAJW32JPZiiHesYV0s/OYZcHOUqYgxzUNoYzOPp4QOAvTmuoTMLdkz1NoWAuntXrw==
+"@itsmworkbench/cli@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/cli/-/cli-0.3.8.tgz#371a8dd126d8e477681affcda08d7ccfa36db783"
+  integrity sha512-WGT0UoJk8hGhK2kpZWHCYBsLc+FCEASYFmAa/mTWdwUOm7YPdiHBOP/a0oXt4Ry2GxqJfuVxzYf6EG7rsD5PEg==
   dependencies:
-    "@itsmworkbench/utils" "0.3.7"
+    "@itsmworkbench/utils" "0.3.8"
     "@laoban/fileops" "1.4.51"
     "@laoban/utils" "1.4.51"
     debug "^4.3.4"
 
-"@itsmworkbench/commander12@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/commander12/-/commander12-0.3.7.tgz#54dfaa39ad4307661c954744cb5f8590cc189ed3"
-  integrity sha512-DneHz+Ka6mvCQkO6iKv5Pa6uGNZ3SDbTTrzNMxlsxemt6F4XEbENZJfQcOJfX27crWX1sCeTgBsKWMKikklKBQ==
+"@itsmworkbench/commander12@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/commander12/-/commander12-0.3.8.tgz#fc83e66b4811dd6fcea93692679b6e4b93590f43"
+  integrity sha512-nDZXCA7dFNkM53SqmwWANHP14uPTZvKtr/lm2hX8rSsGX/UwV+kAaBDewz02Sw53BF7aZVSqJzA2VTOLZV6SLw==
   dependencies:
-    "@itsmworkbench/cli" "0.3.7"
+    "@itsmworkbench/cli" "0.3.8"
     commander "^v12.0.0"
     debug "^4.3.4"
 
-"@itsmworkbench/config@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/config/-/config-0.3.7.tgz#0ec49b1799cf39d4910db5c8302421e74e4bc36b"
-  integrity sha512-vvKy+2tOfdR62J64v+nlLKYy3ychFJT/UYSFbAOM/0Nw/9jJdbaCabMNjXWZcQ2n/t9mI/NwF3CgfJP4DAEx4A==
+"@itsmworkbench/config@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/config/-/config-0.3.8.tgz#5949b769ea06e2ef5e6202f1cd29bc42e1271809"
+  integrity sha512-rxmw2Q2tKpAtoYobNI5xBN1tid7uJksj1K5LKBxjM9DT9xB9G8pNACEKfaL3T4/Gjj6W1EhTNTJ+7BQg2mkBiQ==
   dependencies:
-    "@itsmworkbench/cli" "0.3.7"
-    "@itsmworkbench/utils" "0.3.7"
+    "@itsmworkbench/cli" "0.3.8"
+    "@itsmworkbench/utils" "0.3.8"
     "@laoban/utils" "1.4.51"
     debug "^4.3.4"
 
-"@itsmworkbench/jsyaml@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/jsyaml/-/jsyaml-0.3.7.tgz#040f7ac117f65d759daa4b14a718403d7f612e95"
-  integrity sha512-VSkJh1l2LC4d+hFBblYi3JydS6ChGeIoMPo2PIe4a/IvdwpBTY41P5FlIEvPYWP4vRVrFE7gkPAb8WLSgETAyg==
+"@itsmworkbench/jsyaml@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/jsyaml/-/jsyaml-0.3.8.tgz#9599eb2bc98f85578f8d2924c1eae564351b901c"
+  integrity sha512-Xd63thViDKTcms7XBgKPSa2B50fMcSb+YpaP0oC3FcrH1AQNscKTHSZUtw448NM5sKGc+YlcHxOUeHw84Y/DNA==
   dependencies:
-    "@itsmworkbench/yaml" "0.3.7"
+    "@itsmworkbench/yaml" "0.3.8"
     debug "^4.3.4"
     js-yaml "^4.1.0"
 
-"@itsmworkbench/utils@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/utils/-/utils-0.3.7.tgz#76f5ea1d732b1bd0dd97f890df7430dd0e160bbd"
-  integrity sha512-/lOlw23IHcjFK+JWNXUGiz5eVLNVpeDLKPl2UlRinoDeOFb7m42tcEB6WjirWxefhjcfi5SDsLReUrDSRHUpYw==
+"@itsmworkbench/kleislis@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/kleislis/-/kleislis-0.3.8.tgz#d00bb78fa5463ff911689ff9d2519b5877c6ee03"
+  integrity sha512-sm3DqidocC+oHsK+DrkxMy1C4bT1LGTKqyHrFQLJbCaW6QpqfeZDG3CuR56KTI7TLkRgFDkjvjCxGMKLyq9rbg==
+  dependencies:
+    "@laoban/utils" "1.4.51"
+    "@laoban/variables" "1.4.51"
+    debug "^4.3.4"
+
+"@itsmworkbench/utils@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/utils/-/utils-0.3.8.tgz#3e2a9ed6938a3a2eebd76be90efefaae9923c85f"
+  integrity sha512-zc9aU0uLkikqRvaNKSv8eG2vZUej0Abl5THDlfI0Kr0Y7g7lY3kgrNe47eeMSfSFvWh62kLylqz0yos0SRCZTw==
   dependencies:
     "@focuson/lens" "1.44.3"
     debug "^4.3.4"
     node "^v14.4.0"
 
-"@itsmworkbench/yaml@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@itsmworkbench/yaml/-/yaml-0.3.7.tgz#159622b6893047cfc60fe22c44c4c4568647edd7"
-  integrity sha512-TZo7LnuqNFotl5PuwZjwUuLzeTH95LjOqLJ3ZVJ0vfA/zVMBvsOeXMhxjbNIspM9htOKCSkjMxiss/xFd9Qr0w==
+"@itsmworkbench/yaml@0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@itsmworkbench/yaml/-/yaml-0.3.8.tgz#a4a27d2b148d0d7b0118dca3ef179ae91e69a44f"
+  integrity sha512-HbAA1jWqeP5h8jBgAuWdQGC78+tyWSw6dnA9bfpvnsv57bmpv2gWeH9TGHSfNFbQH920X4vXyGd2S1lD1h74GA==
   dependencies:
     "@laoban/utils" "1.4.51"
     debug "^4.3.4"
@@ -950,6 +959,14 @@ asynckit@^0.4.0:
   resolved "https://registry.yarnpkg.com/asynckit/-/asynckit-0.4.0.tgz#c79ed97f7f34cb8f2ba1bc9790bcc366474b4b79"
   integrity sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==
 
+axios-mock-adapter@^1.22.0:
+  version "1.22.0"
+  resolved "https://registry.yarnpkg.com/axios-mock-adapter/-/axios-mock-adapter-1.22.0.tgz#0f3e6be0fc9b55baab06f2d49c0b71157e7c053d"
+  integrity sha512-dmI0KbkyAhntUR05YY96qg2H6gg0XMl2+qTW0xmYg6Up+BFBAJYRLROMXRdDEL06/Wqwa0TJThAYvFtSFdRCZw==
+  dependencies:
+    fast-deep-equal "^3.1.3"
+    is-buffer "^2.0.5"
+
 axios@^1.7.2:
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/axios/-/axios-1.7.2.tgz#b625db8a7051fbea61c35a3cbb3a1daa7b9c7621"
@@ -1471,6 +1488,11 @@ expect@^29.0.0, expect@^29.7.0:
     jest-message-util "^29.7.0"
     jest-util "^29.7.0"
 
+fast-deep-equal@^3.1.3:
+  version "3.1.3"
+  resolved "https://registry.yarnpkg.com/fast-deep-equal/-/fast-deep-equal-3.1.3.tgz#3a7d56b559d6cbc3eb512325244e619a65c6c525"
+  integrity sha512-f3qQ9oQy9j2AhBe/H9VC91wLmKBCCU/gDOnKNAYG5hswO7BLKj09Hc5HYNz9cGI++xlpDCIgDaitVs03ATR84Q==
+
 fast-json-stable-stringify@2.x, fast-json-stable-stringify@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/fast-json-stable-stringify/-/fast-json-stable-stringify-2.1.0.tgz#874bf69c6f404c2b5d99c481341399fd55892633"
@@ -1699,6 +1721,11 @@ is-arrayish@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/is-arrayish/-/is-arrayish-0.2.1.tgz#77c99840527aa8ecb1a8ba697b80645a7a926a9d"
   integrity sha512-zz06S8t0ozoDXMG+ube26zeCTNXcKIPJZJi8hBrF4idCLms4CG9QtK7qBl1boi5ODzFpjswb5JPmHCbMpjaYzg==
+
+is-buffer@^2.0.5:
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-2.0.5.tgz#ebc252e400d22ff8d77fa09888821a24a658c191"
+  integrity sha512-i2R6zNFDwgEHJyQUtJEk0XFi1i0dPFn/oqjK3/vPCcDeJvW5NQ83V8QbicfF1SupOaB0h8ntgBC2YiE7dfyctQ==
 
 is-core-module@^2.13.0:
   version "2.14.0"
