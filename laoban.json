@@ -9,7 +9,7 @@
   ],
   "properties":     {
     "license":       "MIT",
-    "repository":    "git@github.com:itsmworkbench/knowledgearticles.git",
+    "repository":    "git@github.com:itsmworkbench/summarisation.git",
     "laobanVersion": "1.4.51",
     "itsmworkbench": "0.3.8"
   },

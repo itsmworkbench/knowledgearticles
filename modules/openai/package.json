@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/openai",
   "description": "Client for openai",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "main": "dist/index",
   "types": "dist/index",
   "browser": {
@@ -57,7 +57,7 @@
   ],
   "keywords": [],
   "license": "MIT",
-  "repository": "git@github.com:itsmworkbench/knowledgearticles.git",
+  "repository": "git@github.com:itsmworkbench/summarisation.git",
   "scripts": {
     "test": "jest --config jest.config.json --env node",
     "test:watch": "npm run test -- --watch"
