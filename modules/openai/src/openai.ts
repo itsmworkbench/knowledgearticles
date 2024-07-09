@@ -21,12 +21,17 @@ export const openAiClient = ( config: OpenAiConfig, ): AiClient => {
   if ( !customisation ) customisation = {}
   return async ( messages: Message[] ): Promise<Message[]> => {
     if ( debug ) console.log ( 'openAiMessagesClient', messages )
-    const response = await axios.post ( `/v1/chat/completions`, {
-      model,
-      messages,
-      ...customisation
-    } );
-    return response.data.choices.map ( ( x: any ) => x.message );
+    try {
+      const response = await axios.post ( `/v1/chat/completions`, {
+        model,
+        messages,
+        ...customisation
+      } );
+      return response.data.choices.map ( ( x: any ) => x.message );
+    } catch ( e: any ) {
+      if ( e.code && e.code.includes ( 'ERR_BAD_REQUEST' ) ) throw new Error ( 'Bad Request' )
+      throw e
+    }
   }
 }
 
