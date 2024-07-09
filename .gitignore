@@ -2,10 +2,11 @@
 .cache/
 build/
 .env
-knowledgearticles/html
-knowledgearticles/text
-knowledgearticles/tika
-knowledgearticles/summary
+knowledgearticles/inputs/
+knowledgearticles/html/
+knowledgearticles/text/
+knowledgearticles/tika/
+knowledgearticles/summary/
 
 .session/
 .log

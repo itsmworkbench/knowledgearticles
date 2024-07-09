@@ -32,7 +32,8 @@ export function addValidateCommand<Commander, Config> ( tc: ContextConfigAndComm
         if ( problem ) console.log ( `    ${ai.token} is not set in the environment` )
         else console.log ( `    ${ai.token} is set in the environment` )
         try {
-          await openAiClient ( defaultOpenAiConfig ( ai.url, env[ ai.token ], ai.model ) ) ( [ { role: 'system', content: 'test' } ] )
+          const { axios, addAxiosInterceptors } = tc.context
+          await openAiClient ( defaultOpenAiConfig ( ai.url, env[ ai.token ], ai.model, axios, addAxiosInterceptors ) ) ( [ { role: 'system', content: 'test' } ] )
           console.log ( `    ${ai.url} is reachable` )
         } catch ( e: any ) {
           console.log ( `    ${ai.url} is not reachable` )

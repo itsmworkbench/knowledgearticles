@@ -17,6 +17,7 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
       '--clean': { description: 'Delete the output file directories at the start' },
       '--debug': { description: 'Show debug information' },
       '--noReport': { description: `Don't make a report` },
+      '--noNonFunctionals': { description: 'Do not use non functionals' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
     action: async ( c, opts ) => {

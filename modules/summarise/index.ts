@@ -10,6 +10,7 @@ import { configCommands } from "@itsmworkbench/config";
 import * as fs from "node:fs";
 import { defaultYaml } from "./src/default.yaml";
 import { addAllSummaryCommands } from "./src/commands/summarise.commands";
+import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
 if ( process.argv[ 2 ] === 'init' ) {
   console.log ( 'init' )
@@ -43,12 +44,36 @@ if ( process.argv[ 2 ] === 'init' ) {
 
 
   let fileOps = fileOpsNode ();
+
+  function addAxiosInterceptors ( axios: AxiosInstance ) {
+    axios.interceptors.response.use (
+      ( response: AxiosResponse ) => {
+        // You can log the response details if needed
+        return response;
+      },
+      ( error: AxiosError ) => {
+        // Log only the necessary error details
+        if ( error.response ) {
+          console.error ( `Error response from ${error.config?.url}:`, {
+            status: error.response.status,
+            data: error.response.data,
+          } );
+        } else {
+          console.error ( 'Error without response:', error.message );
+        }
+        return Promise.reject ( error );
+      }
+    );
+  }
+
   const makeContext = (): SummariseContext => ({
     version: findVersion (), name: 'summarise',
     currentDirectory: process.cwd (),
     env: process.env as NameAnd<string>,
     fileOps,
-    args: process.argv
+    args: process.argv,
+    axios,
+    addAxiosInterceptors
   });
 
   const cliTc: CliTc<Commander12, SummariseContext, SummariseConfig, SummariseConfig> =

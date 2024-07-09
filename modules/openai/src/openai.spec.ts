@@ -1,28 +1,17 @@
 import axios, { AxiosStatic } from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import { Message, openAiClient, OpenAiConfig } from "./openai";
+import { defaultOpenAiConfig, Message, openAiClient, OpenAiConfig } from "./openai";
 
 
 describe ( 'openAiClient', () => {
   let mock: MockAdapter;
   let config: OpenAiConfig;
 
+  const baseURL = 'https://api.openai.com';
+  const Authorization = 'Bearer test-token';
   beforeEach ( () => {
     mock = new MockAdapter ( axios );
-    config = {
-      axios: axios as AxiosStatic,
-      baseURL: 'https://api.openai.com',
-      Authorization: 'Bearer test-token',
-      model: 'davinci',
-      customisation: {},
-      debug: false,
-    };
-  } );
-
-  it ( 'should throw an error if baseURL is not provided', () => {
-    const invalidConfig = { ...config, baseURL: undefined } as any;
-
-    expect ( () => openAiClient ( invalidConfig ) ).toThrow ( 'baseURL is required for open ai. Have you set up the .env file?' );
+    config = defaultOpenAiConfig ( baseURL, Authorization, 'davinci', axios, ( a ) => {} );
   } );
 
   it ( 'should use default model if not provided', async () => {

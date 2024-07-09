@@ -1,4 +1,4 @@
-import axios, { AxiosStatic } from "axios";
+import axios, { AxiosInstance, AxiosStatic } from "axios";
 
 
 export type Message = {
@@ -8,9 +8,7 @@ export type Message = {
 export type AiClient = ( prompt: Message[] ) => Promise<Message[]>
 
 export type OpenAiConfig = {
-  axios: AxiosStatic,
-  baseURL?: string
-  Authorization: string,
+  axios: AxiosInstance,
   model?: string
   //Any customisation for the call. See https://platform.openai.com/docs/api-reference/chat/create
   customisation?: any
@@ -18,10 +16,25 @@ export type OpenAiConfig = {
 }
 
 export const openAiClient = ( config: OpenAiConfig, ): AiClient => {
-  let { axios, baseURL, Authorization, model, customisation, debug } = config
-  if ( !baseURL ) throw new Error ( 'baseURL is required for open ai. Have you set up the .env file?' );
+  let { axios, model, customisation, debug } = config
   if ( !model ) model = "davinci"
   if ( !customisation ) customisation = {}
+  return async ( messages: Message[] ): Promise<Message[]> => {
+    if ( debug ) console.log ( 'openAiMessagesClient', messages )
+    const response = await axios.post ( `/v1/chat/completions`, {
+      model,
+      messages,
+      ...customisation
+    } );
+    return response.data.choices.map ( ( x: any ) => x.message );
+  }
+}
+
+
+export const defaultOpenAiConfig = ( baseURL: string, token: string, model: string, axios: AxiosStatic, addInterceptors: ( a: AxiosInstance ) => void ): OpenAiConfig => {
+  if ( !baseURL ) throw new Error ( 'baseURL is required for open ai. Have you set up the .env file?' );
+  if ( !model ) model = "davinci"
+  const Authorization = `Bearer ${token}`
   const axiosInstance = axios.create ( {
     baseURL,
     headers: {
@@ -29,28 +42,9 @@ export const openAiClient = ( config: OpenAiConfig, ): AiClient => {
       'Content-Type': 'application/json',
     },
   } );
-  return async ( messages: Message[] ): Promise<Message[]> => {
-    if ( debug ) console.log ( 'openAiMessagesClient', messages )
-    try {
-      const response = await axiosInstance.post ( `/v1/chat/completions`, {
-        model,
-        messages,
-        ...customisation
-      } );
-      return response.data.choices.map ( ( x: any ) => x.message );
-    } catch ( error ) {
-      console.error ( 'Error calling openai:', messages, error );
-      throw error;
-    }
-  }
-}
-
-
-export const defaultOpenAiConfig = ( baseURL: string, token: string, model: string ): OpenAiConfig => {
+  addInterceptors ( axiosInstance )
   return {
-    axios,
-    baseURL,
-    Authorization: `Bearer ${token}`,
+    axios: axiosInstance,
     model
   };
 }

@@ -30,6 +30,8 @@ export function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
     console.log ( 'made html files', await transformFiles ( fn => JSON
         .parse ( fn ).map ( ( page: any ) => {
           let html = page[ "X-TIKA:content" ];
+          if ( html === undefined ) return ''
+          if ( typeof html !== 'string' ) throw new Error ( `Expected string got ${typeof html}` )
           let $ = cheerio.load ( html );
           return $ ( 'body' ).text ()
         } )

@@ -73,30 +73,34 @@ export const inputToOutputFileName = ( inputDir: string, outputDir: string, conf
 };
 
 
-const transformOneFile = ( fn: ( s: string, oldOutput: string | undefined ) => Promise<string | undefined>, inputDir: string, outputDir: string, config: TransformFilesConfig ) => async ( file: string ) => {
-  const { filter, includeOutput, debug, dryRun, newFileNameFn = (f => f) } = config
-  const metrics: TranformFilesMetric = { readCount: 0, writeCount: 0, failed: [] }
-  const inToOut = inputToOutputFileName ( inputDir, outputDir, config )
-  try {
-    const content: string = await fs.readFile ( file, 'utf-8' );
-    const outputFilePath = inToOut ( file );
-    const oldOutput = includeOutput ? await fs.readFile ( outputFilePath, 'utf-8' ).catch ( () => undefined ) : undefined;
-    if ( debug || dryRun ) console.log ( 'file', file, '=>', outputFilePath, 'oldExists', oldOutput !== undefined )
-    const newContent = await fn ( content, oldOutput );
+const transformOneFile = ( fn: ( s: string, oldOutput: string | undefined ) => Promise<string | undefined>, inputDir: string, outputDir: string, config: TransformFilesConfig ) =>
+  async ( file: string ) => {
+    const { includeOutput, debug, dryRun, newFileNameFn = (f => f) } = config
+    const metrics: TranformFilesMetric = { readCount: 0, writeCount: 0, failed: [] }
+    const inToOut = inputToOutputFileName ( inputDir, outputDir, config )
+    try {
+      const content: string = await fs.readFile ( file, 'utf-8' );
+      const outputFilePath = inToOut ( file );
+      const oldOutput = includeOutput ? await fs.readFile ( outputFilePath, 'utf-8' ).catch ( () => undefined ) : undefined;
+      if ( debug || dryRun ) console.log ( 'file', file, '=>', outputFilePath, 'oldExists', oldOutput !== undefined )
+      const newContent = await fn ( content, oldOutput );
 
-    if ( newContent && !dryRun ) {
-      const newDir = path.dirname ( outputFilePath );
-      await fs.mkdir ( newDir, { recursive: true } );
-      await fs.writeFile ( outputFilePath, newContent );
-      metrics.writeCount++;
+      if ( newContent && !dryRun ) {
+        const newDir = path.dirname ( outputFilePath );
+        await fs.mkdir ( newDir, { recursive: true } );
+        await fs.writeFile ( outputFilePath, newContent );
+        metrics.writeCount++;
+      }
+      metrics.readCount++;
+    } catch ( e: any ) {
+      if ( e.name === 'AxiosError' )
+        console.error ( `Failed`, file)
+      else
+        console.error ( `Failed`, file, e )
+      metrics.failed.push ( file )
     }
-    metrics.readCount++;
-  } catch ( e ) {
-    console.error ( `Failed`, file, e )
-    metrics.failed.push ( file )
-  }
-  return metrics
-};
+    return metrics
+  };
 export const transformFiles = ( fn: ( s: string, oldOutput: string | undefined ) => Promise<string | undefined>, config: TransformFilesConfig = {} ): TranformFiles => {
   const { filter } = config
   return async ( inputDir: string, outputDir: string ) => {

@@ -13,6 +13,10 @@ ai:
   url: https://api.openai.com
   model: gpt-3.5-turbo
   token: OPENAI_TOKEN
+#   type: sagemaker
+#   url: https://runtime.sagemaker.us-west-2.amazonaws.com/endpoints/summarize
+#   model: mystral.sdflkj.dfgklj
+#   token: SAGEMAKER_TOKEN
 
 nonfunctionals:
   throttlingPerHour: 1000 # 1000 requests per hour

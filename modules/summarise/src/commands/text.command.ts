@@ -33,7 +33,8 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
     const tokenValue = tc.context.env[ token ]
     if ( !tokenValue ) throw new Error ( `Environment variable ${token} is required for open ai.` );
 
-    const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model ) )
+    const { axios, addAxiosInterceptors } = tc.context
+    const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model, axios, addAxiosInterceptors ) )
 
 
     let transformOne = async ( f: string, sha: string ) => {
@@ -46,13 +47,18 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
       const json = JSON.parse ( chosen )
       return JSON.stringify ( { sha, ...json }, null, 2 )
     };
+
     const retry = tc.config.nonfunctionals.retry
     const throttling: Throttling = configToThrottling ( tc.config.nonfunctionals )
+
     const queue: Task<any>[] = [];
-    const withNfcs = withRetry ( retry, withThrottle ( throttling, withConcurrencyLimit ( tc.config.nonfunctionals.concurrent, queue, transformOne ) ) )
+    const withNfcs = opts.noNonFunctionals ? transformOne : withRetry ( retry,
+      withThrottle ( throttling,
+        withConcurrencyLimit ( tc.config.nonfunctionals.concurrent, queue,
+          transformOne ) ) )
     startThrottling ( throttling )
     try {
-      console.log ( 'made summary files', await transformFilesIfShaChanged ( transformOne, config ) ( text, summary ) )
+      console.log ( 'made summary files', await transformFilesIfShaChanged ( withNfcs, config ) ( text, summary ) )
     } finally {
       stopThrottling ( throttling )
     }
@@ -64,6 +70,7 @@ export function addTextCommand<Commander, Config> ( tc: ContextConfigAndCommande
     description: `turn text files to summary`,
     options: {
       '--clean': { description: 'Delete the output file directory at the start' },
+      '--noNonFunctionals': { description: 'Do not use non functionals' },
       '--debug': { description: 'Show debug information' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }
     },
