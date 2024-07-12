@@ -11,7 +11,7 @@
     "license":       "MIT",
     "repository":    "git@github.com:itsmworkbench/summarisation.git",
     "laobanVersion": "1.4.51",
-    "itsmworkbench": "0.3.8"
+    "itsmworkbench": "0.3.10"
   },
   "templates":      {
     "typescript":    "templates/typescript",

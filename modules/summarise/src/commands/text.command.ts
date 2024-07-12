@@ -34,7 +34,13 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
     if ( !tokenValue ) throw new Error ( `Environment variable ${token} is required for open ai.` );
 
     const { axios, addAxiosInterceptors } = tc.context
-    const openai = openAiClient ( defaultOpenAiConfig ( url, tokenValue, model, axios, addAxiosInterceptors ) )
+    const openai = openAiClient ( {
+      ...defaultOpenAiConfig ( url, tokenValue, model, axios, addAxiosInterceptors ),
+      customisation: {
+        response_format: { type: 'json_object' },
+      },
+      debug: opts.debug === true
+    } )
 
 
     let transformOne = async ( f: string, sha: string ) => {
@@ -44,11 +50,19 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
       if ( opts.dryRun ) return undefined
       let choices = await openai ( prompt );
       let chosen = choices.map ( m => m.content ).join ( '\n' );
-      const json = JSON.parse ( chosen )
+      function parse () {
+        try {
+          return JSON.parse ( chosen );
+        } catch ( e: any ) {
+          console.log ( 'error parsing', f, chosen, e )
+          throw e
+        }
+      }
+      const json = parse ()
       return JSON.stringify ( { sha, ...json }, null, 2 )
     };
 
-    const retry = tc.config.nonfunctionals.retry
+    const retry = { ...tc.config.nonfunctionals.retry, debug: opts.debug === true }
     const throttling: Throttling = configToThrottling ( tc.config.nonfunctionals )
 
     const queue: Task<any>[] = [];

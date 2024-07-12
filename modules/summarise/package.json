@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/summarise",
   "description": "cli for summariser",
-  "version": "0.2.13",
+  "version": "0.2.14",
   "main": "dist/index",
   "types": "dist/index",
   "bin": {
@@ -27,14 +27,14 @@
     "@laoban/utils": "1.4.51",
     "@laoban/filesops-node": "1.4.51",
     "@laoban/variables": "1.4.51",
-    "@itsmworkbench/utils": "0.3.8",
-    "@itsmworkbench/config": "0.3.8",
-    "@itsmworkbench/commander12": "0.3.8",
-    "@itsmworkbench/cli": "0.3.8",
-    "@itsmworkbench/jsyaml": "0.3.8",
-    "@itsmworkbench/kleislis": "0.3.8",
-    "@summarisation/fileutils": "0.2.13",
-    "@summarisation/openai": "0.2.13",
+    "@itsmworkbench/utils": "0.3.10",
+    "@itsmworkbench/config": "0.3.10",
+    "@itsmworkbench/commander12": "0.3.10",
+    "@itsmworkbench/cli": "0.3.10",
+    "@itsmworkbench/jsyaml": "0.3.10",
+    "@itsmworkbench/kleislis": "0.3.10",
+    "@summarisation/fileutils": "0.2.14",
+    "@summarisation/openai": "0.2.14",
     "debug": "^4.3.4"
   },
   "devDependencies": {

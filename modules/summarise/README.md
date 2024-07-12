@@ -160,20 +160,22 @@ This is useful because I have noticed that only occasionally the ai returns a js
 prompt: |
   I want you to evaluate a Knowledge Article for an ITSM issue using the following four areas
 
-  description: Do we have a clear description of what the issue is that this KEDB is about? Red/Orange/Green
-  detection: Do we have a clear technical mechanism to determine that the issue exists. For example sql calls, api calls and so on
-  and if we do, do we have enough information. For example with sql we need database connection details. For apis we need the urls
-  resolution: Do we have a clear technical mechanism to resolve the issue. Same example issues (ie. sql needs conneciton issues)
-  validation: Do we have a clear technical mechanism to validate that we have resolved the issue
+   description: Do we have a clear description of what the issue is that this KEDB is about? To be good it should describe the symptoms, the cause and the impact
+   detection: Do we have a clear technical mechanism to determine that the issue exists. For example sql calls, api calls and so on
+   and if we do, do we have enough information. For example with sql we need database connection details. For apis we need the urls
+   resolution: Do we have a clear technical mechanism to resolve the issue. Same example issues (ie. sql needs conneciton issues)
+   validation: Do we have a clear technical mechanism to validate that we have resolved the issue
 
-  Note that traffic light colours are Red, Amber, Green
+   Note that traffic light colours are Red, Amber, Green
 
-  The results will be used in RAG, so please provide a json object  with the name of the section (the description, detection, resolution and validation)
-  each section is an object having two fields called 'value' and 'summary'. The first is  a  traffic light value, and the second a summary of why that value was chosen.
-  In addition create a final object called 'summary' with the same two fields which score the whole based on the traffic light values, and give a summary about the quality of the KEDB entry.
+   The results will be used in RAG, so please provide a json object  with the name of the section (the description, detection, resolution and validation)
+   each section is an object having two fields called 'value' and 'summary'. The first is  a  traffic light value, and the second a summary of why that value was chosen.
+   In addition create a final object called 'summary' with the same two fields which score the whole based on the traffic light values, and give a summary about the quality of the KEDB entry.
 
-  The knowledge article is
-  {text}
+   Please do not repeat the description in the summary: we want just a json object with the four sections and the summary
+
+   The knowledge article is
+   {text}
 ```
 
 I think this is pretty obvious: it's the prompt engineering. Note the {text} at the end. This is replaced by
@@ -220,8 +222,11 @@ The point of this is that
     * Each of these commands has a `--debug` option which will print out the command that is run
     * They also have a `--dry-run` option which will print out the command that is run but not run it
 
-Note that if you are behind a corporate proxy at the moment there is no safe option.
+Note that if you are behind a corporate proxy at the moment this might not work
 
+* We are using axios. See the axios documentation for the usage of environment variables 
+  * [Read this](https://axios-http.com/docs/req_config). The relevant section is `httpAgent` and `httpsAgent` and their documentation
+  * This is untested
 * You can set the env variable NODE_TLS_REJECT_UNAUTHORIZED to the value 0
     * This exposes you to man in the middle attacks and is unsafe. Please do not go to production with this
     * Please read https://hayageek.com/disable-ssl-verification-in-node-js/ for more information

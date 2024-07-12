@@ -20,13 +20,14 @@ export const openAiClient = ( config: OpenAiConfig, ): AiClient => {
   if ( !model ) model = "davinci"
   if ( !customisation ) customisation = {}
   return async ( messages: Message[] ): Promise<Message[]> => {
-    if ( debug ) console.log ( 'openAiMessagesClient', messages )
     try {
-      const response = await axios.post ( `/v1/chat/completions`, {
+      const data = {
         model,
         messages,
         ...customisation
-      } );
+      };
+      if ( debug ) console.log ( 'openAiMessagesClient', data )
+      const response = await axios.post ( `/v1/chat/completions`, data );
       return response.data.choices.map ( ( x: any ) => x.message );
     } catch ( e: any ) {
       if ( e.code && e.code.includes ( 'ERR_BAD_REQUEST' ) ) throw new Error ( 'Bad Request' )
