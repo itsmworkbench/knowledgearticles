@@ -173,10 +173,10 @@ prompt: |
   In addition create a final object called 'summary' with the same two fields which score the whole based on the traffic light values, and give a summary about the quality of the KEDB entry.
 
   The knowledge article is
-  {knowledgeArticle}
+  {text}
 ```
 
-I think this is pretty obvious: it's the prompt engineering. Note the {knowledgeArticle} at the end. This is replaced by
+I think this is pretty obvious: it's the prompt engineering. Note the {text} at the end. This is replaced by
 the text of the document
 
 Also note that is pretty nice if you want to customise it: you don't need code, just change the prompt. Have fun playing

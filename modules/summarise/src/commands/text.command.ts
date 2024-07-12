@@ -38,7 +38,7 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
 
 
     let transformOne = async ( f: string, sha: string ) => {
-      const content = simpleTemplate ( tc.config.prompt, { knowledgeArticle: f } )
+      const content = simpleTemplate ( tc.config.prompt, { text: f } )
       let prompt: Message[] = [ { role: 'system', content } ];
       if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
       if ( opts.dryRun ) return undefined

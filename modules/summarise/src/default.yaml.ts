@@ -51,5 +51,5 @@ prompt: |
   In addition create a final object called 'summary' with the same two fields which score the whole based on the traffic light values, and give a summary about the quality of the KEDB entry.
   
   The knowledge article is
-  {knowledgeArticle}
+  {text}
 `

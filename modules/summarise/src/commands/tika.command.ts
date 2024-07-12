@@ -9,7 +9,8 @@ export function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `html `, opts )
     await abortIfDirectoryDoesNotExist ( tc.config.directories.tika, `tika directory ${tc.config.directories.tika} does not exist` )
-    const { tika, text } = tc.config.directories
+    const { tika, text
+    } = tc.config.directories
     if ( opts.clean ) await fs.promises.rm ( text, { recursive: true } )
 
     const digest = calculateSHA256
