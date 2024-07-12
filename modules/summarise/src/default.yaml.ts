@@ -13,44 +13,6 @@ ai:
   url: https://api.openai.com
   model: gpt-3.5-turbo
   token: OPENAI_TOKEN
-
-nonfunctionals:
-  throttlingPerHour: 1000 # 1000 requests per hour
-  concurrent: 100 # No more than 100 concurrent requests
-  retry:
-    initialInterval: 5000
-    maximumInterval: 20000
-    maximumAttempts: 10
-    nonRecoverableErrors:
-      - Not Found
-
-schema: # The json returned has to match this schema
-  type: inline
-  value: true
-report:
-  categories: [ "description", "detection", "resolution", "validation", "summary" ]
-  fields:
-    value:
-      type: enum
-      enum: [ "Red", "Amber", "Green" ]
-#    example:
-#      type: number
-prompt: |
-directories:
-  inputs: knowledgearticles/inputs
-  tika: knowledgearticles/tika
-  text: knowledgearticles/text
-  summary: knowledgearticles/summary
-
-tika:
-  type: jar
-  jar: tika-app-2.9.2.jar
-
-ai:
-  type: openai
-  url: https://api.openai.com
-  model: gpt-3.5-turbo
-  token: OPENAI_TOKEN
 #   type: sagemaker
 #   url: https://runtime.sagemaker.us-west-2.amazonaws.com/endpoints/summarize
 #   model: mystral.sdflkj.dfgklj
@@ -97,5 +59,4 @@ prompt: |
   
   The knowledge article is
   {text}
-
 `
