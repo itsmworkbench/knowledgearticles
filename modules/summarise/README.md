@@ -94,6 +94,8 @@ This example is for knowledge articles. You can use your own values.
   preserved in the other directories
 * tika is where the data extracted from the documents by Apache Tika is stored
 * text is where the plain text is stored
+  * Note that if apache tika splits the document into multiple files then the text is stored in multiple files
+  * The file name is the original filename but the extension is .xxx.txt where xxx is a number representing where the data came from in the original document
 * summary is where the summaries are stored
 
 ## Tika jar configuration

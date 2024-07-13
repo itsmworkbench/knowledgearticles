@@ -2,41 +2,39 @@ import { ActionFn, CommandDetails, ContextConfigAndCommander } from "@itsmworkbe
 import { SummariseContext } from "../summarise.context";
 import { abortIfDirectoryDoesNotExist, SummariseConfig } from "../summarise.config";
 import fs from "node:fs";
-import { calculateSHA256, changeExtension, TransformDirectoryIfShaChangedConfig, transformFiles } from "@summarisation/fileutils";
+import { changeExtension, changeExtensionAddIndex, FileAndContent, transformFiles, TransformFilesConfig, TransformOneFileFn } from "@summarisation/fileutils";
 import cheerio from "cheerio";
 
 export function tikaAction<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): ActionFn<Commander> {
   return async ( _, opts ) => {
     if ( opts.debug ) console.log ( `html `, opts )
     await abortIfDirectoryDoesNotExist ( tc.config.directories.tika, `tika directory ${tc.config.directories.tika} does not exist` )
-    const { tika, text
-    } = tc.config.directories
+    await fs.promises.mkdir ( tc.config.directories.text, { recursive: true } )
+    const {
+            tika, text
+          } = tc.config.directories
     if ( opts.clean ) await fs.promises.rm ( text, { recursive: true } )
 
-    const digest = calculateSHA256
-    const config: TransformDirectoryIfShaChangedConfig = {
-      digest,
-      getShaFromOutput: async ( s: string ) => {
-        try {
-          return s.split ( '\n' )[ 0 ]//first line is the digest
-        } catch ( e ) {
-          return ''
-        }
-      },
+    const fn: TransformOneFileFn = async ( content: string, marker: string | undefined, newFilename ): Promise<FileAndContent[]> => {
+      let result: FileAndContent[] = JSON.parse ( content ).flatMap ( ( page: any, index: number ) => {
+        let html = page[ "X-TIKA:content" ];
+        if ( html === undefined ) return ''
+        if ( typeof html !== 'string' ) throw new Error ( `Expected string got ${typeof html}` )
+        let $ = cheerio.load ( html );
+        return { file: newFilename ( index ), content: $ ( 'body' ).text () }
+      } );
+      return result.filter ( ( { content } ) => content.length > 0 );
+    };
+    const config: TransformFilesConfig = {
+      inputDir: tika,
+      outputDir: text,
+      fn,
       filter: ( file: string ) => file.endsWith ( '.json' ),
-      newFileNameFn: changeExtension ( '.txt' ),
+      newFileNameFn: changeExtensionAddIndex ( '.txt' ),
       debug: opts.debug === true,
       dryRun: opts.dryRun === true
     }
-    console.log ( 'made html files', await transformFiles ( fn => JSON
-        .parse ( fn ).map ( ( page: any ) => {
-          let html = page[ "X-TIKA:content" ];
-          if ( html === undefined ) return ''
-          if ( typeof html !== 'string' ) throw new Error ( `Expected string got ${typeof html}` )
-          let $ = cheerio.load ( html );
-          return $ ( 'body' ).text ()
-        } )
-      , config ) ( tika, text ) )
+    console.log ( 'made html files', await transformFiles ( config ) )
   };
 }
 export function addTikaCommand<Commander, Config> ( tc: ContextConfigAndCommander<Commander, SummariseContext, Config, SummariseConfig> ): CommandDetails<Commander> {

@@ -3,7 +3,7 @@ import { SummariseContext } from "../summarise.context";
 
 import { abortIfDirectoryDoesNotExist, configToThrottling, SummariseConfig } from "../summarise.config";
 import fs from "node:fs";
-import { calculateSHA256, changeExtension, TransformDirectoryIfShaChangedConfig, transformFilesIfShaChanged } from "@summarisation/fileutils";
+import { calculateSHA256, changeExtension, markerIsShaInOldFile, TransformDirectoryIfShaChangedConfig, transformFilesIfShaChanged, TransformOneFileFn } from "@summarisation/fileutils";
 import { defaultOpenAiConfig, Message, openAiClient } from "@summarisation/openai";
 import { simpleTemplate } from "@itsmworkbench/utils";
 import { startThrottling, stopThrottling, Task, Throttling, withConcurrencyLimit, withRetry, withThrottle } from "@itsmworkbench/kleislis";
@@ -15,20 +15,7 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
     const { text, summary } = tc.config.directories
     if ( opts.clean ) await fs.promises.rm ( summary, { recursive: true } )
     const digest = calculateSHA256
-    const config: TransformDirectoryIfShaChangedConfig = {
-      digest,
-      getShaFromOutput: async ( s: string ) => {
-        try {
-          return JSON.parse ( s ).sha
-        } catch ( e: any ) {
-          return undefined
-        }
-      },
-      filter: ( file: string ) => file.endsWith ( '.txt' ),
-      newFileNameFn: changeExtension ( '.json' ),
-      debug: opts.debug === true,
-      dryRun: opts.dryRun === true
-    }
+
     const { url, token, model } = tc.config.ai
     const tokenValue = tc.context.env[ token ]
     if ( !tokenValue ) throw new Error ( `Environment variable ${token} is required for open ai.` );
@@ -43,11 +30,11 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
     } )
 
 
-    let transformOne = async ( f: string, sha: string ) => {
+    const transformOne: TransformOneFileFn = async ( f: string, sha: string | undefined, filenameFn ) => {
       const content = simpleTemplate ( tc.config.transform.prompt, { text: f } )
       let prompt: Message[] = [ { role: 'system', content } ];
       if ( opts.dryRun || opts.debug ) console.log ( 'prompt', prompt )
-      if ( opts.dryRun ) return undefined
+      if ( opts.dryRun ) return []
       let choices = await openai ( prompt );
       let chosen = choices.map ( m => m.content ).join ( '\n' );
       function parse () {
@@ -59,7 +46,7 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
         }
       }
       const json = parse ()
-      return JSON.stringify ( { sha, ...json }, null, 2 )
+      return [ { file: filenameFn ( 0 ), content: JSON.stringify ( { sha, ...json }, null, 2 ) } ]
     };
 
     const retry = { ...tc.config.nonfunctionals.retry, debug: opts.debug === true }
@@ -70,9 +57,29 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
       withThrottle ( throttling,
         withConcurrencyLimit ( tc.config.nonfunctionals.concurrent, queue,
           transformOne ) ) )
+
+    const config: TransformDirectoryIfShaChangedConfig = {
+      inputDir: text,
+      outputDir: summary,
+      digest,
+      fn: withNfcs,
+      markerFn: markerIsShaInOldFile,
+      getShaFromOutput: async ( s: string ) => {
+        try {
+          return JSON.parse ( s ).sha
+        } catch ( e: any ) {
+          return undefined
+        }
+      },
+      filter: ( file: string ) => file.endsWith ( '.txt' ),
+      newFileNameFn: changeExtension ( '.json' ),
+      debug: opts.debug === true,
+      dryRun: opts.dryRun === true
+    }
+
     startThrottling ( throttling )
     try {
-      console.log ( 'made summary files', await transformFilesIfShaChanged ( withNfcs, config ) ( text, summary ) )
+      console.log ( 'made summary files', await transformFilesIfShaChanged ( config ) )
     } finally {
       stopThrottling ( throttling )
     }

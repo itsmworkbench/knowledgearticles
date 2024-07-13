@@ -18,7 +18,11 @@ export function inputsAction<Commander, Config> ( tc: ContextConfigAndCommander<
       debug: opts.debug === true,
       dryRun: opts.dryRun === true
     }
-    const inToOutName = inputToOutputFileName ( inputs, tika, { newFileNameFn: changeExtension ( '.json' ) } )
+    const inToOutName = inputToOutputFileName ( inputs, tika, {
+      inputDir: inputs,
+      outputDir: tika,
+      newFileNameFn: changeExtension ( '.json' )
+    } )
 
     console.log ( 'made tika files', await executeRecursivelyCmdChanges ( tc.context.currentDirectory, inputs, dir => {
       let outDir = inToOutName ( dir );
