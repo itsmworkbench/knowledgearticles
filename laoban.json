@@ -22,6 +22,10 @@
     "NPM_TOKEN": ""
   },
   "scripts":        {
+    "rmdist":   {
+      "description": "Removes the dist folder",
+      "commands":    ["file:rmDir(dist)"]
+    },
     "coverage": {
       "description": "Runs the tests with coverage",
       "commands":    [

@@ -18,8 +18,13 @@ export type SummariseConfig = {
   ai: SummariseAi
   tika: SummariseTika
   nonfunctionals: SummariseNonfunctionals
-  schema: SummariseSchema
   report: SumariseReport
+  transform: SummariseTransform
+}
+export type TransformationType = 'onePerFile' | 'onePerPage'
+export type SummariseTransform = {
+  type: TransformationType
+  schema: SummariseSchema
   prompt: string
 }
 export type SumariseReport = {
@@ -112,12 +117,12 @@ function validateRetry ( retry: RetryPolicyConfig ) {
   errors.push ( ...validateNeeded ( retry.maximumAttempts, 'retry.maximumAttempts', 'number' ) )
   return errors
 }
-export function validateSchema ( schema: SummariseSchema ) {
-  if ( !schema || typeof schema !== 'object' ) return [ 'Schema is not an object' ]
+export function validateSchema ( schema: SummariseSchema, name: string ) {
+  if ( !schema || typeof schema !== 'object' ) return [ `${name} is not an object` ]
   const errors: string[] = []
-  errors.push ( ...validateNeeded ( schema.type, 'schema.type' ) )
-  if ( errors.length === 0 && schema.type !== 'inline' ) return [ 'Invalid schema type. Currently only inline allowed' ]
-  if ( schema.value === undefined ) errors.push ( 'schema.value is not defined' )
+  errors.push ( ...validateNeeded ( schema.type, `${name}.type` ) )
+  if ( errors.length === 0 && schema.type !== 'inline' ) return [ `${name}.type (${schema.type}) is invalid.Currently only inline allowed` ]
+  if ( schema.value === undefined ) errors.push ( `${name}.value is not defined` )
   return errors
 }
 export function validateTika ( tika: SummariseTika ) {
@@ -144,6 +149,16 @@ export function validateReport ( report: SumariseReport ) {
   }
   return errors
 }
+export function validationTransform ( tx: SummariseTransform ): string[] {
+  if ( !tx || typeof tx !== 'object' ) return [ 'transform is not an object' ]
+  const errors: string[] = []
+  if ( tx.type === undefined ) return [ 'transform.type is not defined' ]
+  const legal = [ 'onePerFile', 'onePerPage' ]
+  if ( !legal.includes ( tx.type ) ) return [ `Invalid transformation.type: ${tx.type}. Legal values are ${legal.join ( ', ' )}` ]
+  errors.push ( ...validateSchema ( tx.schema, 'transform.schema' ) )
+  errors.push ( ...validateNeeded ( tx.prompt, 'transform.prompt' ) )
+  return errors
+}
 export const validateConfig: ValidateFn<SummariseConfig, SummariseConfig> = ( s: SummariseConfig ): ErrorsAnd<SummariseConfig> => {
   const errors: string[] = []
   if ( typeof s !== 'object' ) {
@@ -154,9 +169,8 @@ export const validateConfig: ValidateFn<SummariseConfig, SummariseConfig> = ( s:
   errors.push ( ...validateAi ( s.ai ) )
   errors.push ( ...validateTika ( s.tika ) )
   errors.push ( ...validateNonfunctionals ( s.nonfunctionals ) )
-  errors.push ( ...validateSchema ( s.schema ) )
-  errors.push ( ...validateNeeded ( s.prompt, 'prompt' ) )
   errors.push ( ...validateReport ( s.report ) )
+  errors.push ( ...validationTransform ( s.transform ) )
   if ( errors.length > 0 ) return errors
   return s
 };
