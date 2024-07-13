@@ -351,13 +351,13 @@ describe ( 'validateSchema', () => {
       value: {}
     };
 
-    const result = validateSchema ( schema );
+    const result = validateSchema ( schema, 'prefix' );
     expect ( result ).toEqual ( [] );
   } );
 
   it ( 'should return errors if schema object is not an object', () => {
-    const result = validateSchema ( null as any );
-    expect ( result ).toEqual ( [ 'Schema is not an object' ] );
+    const result = validateSchema ( null as any, 'prefix' );
+    expect ( result ).toEqual ( [ 'prefix is not an object' ] );
   } );
 
   it ( 'should return errors if schema.type is missing', () => {
@@ -365,8 +365,8 @@ describe ( 'validateSchema', () => {
       value: {}
     };
 
-    const result = validateSchema ( schema as any );
-    expect ( result ).toEqual ( [ 'schema.type is not defined' ] );
+    const result = validateSchema ( schema as any, 'prefix' );
+    expect ( result ).toEqual ( [ 'prefix.type is not defined' ] );
   } );
 
   it ( 'should return errors if schema.type is not "inline"', () => {
@@ -375,8 +375,8 @@ describe ( 'validateSchema', () => {
       value: {}
     };
 
-    const result = validateSchema ( schema as any );
-    expect ( result ).toEqual ( [ 'Invalid schema type. Currently only inline allowed' ] );
+    const result = validateSchema ( schema as any, 'prefix' );
+    expect ( result ).toEqual ( [ "prefix.type (external) is invalid.Currently only inline allowed" ] );
   } );
 
   it ( 'should return errors if schema.value is missing', () => {
@@ -384,8 +384,8 @@ describe ( 'validateSchema', () => {
       type: 'inline'
     };
 
-    const result = validateSchema ( schema as any );
-    expect ( result ).toEqual ( [ 'schema.value is not defined' ] );
+    const result = validateSchema ( schema as any, 'prefix' );
+    expect ( result ).toEqual ( [ 'prefix.value is not defined' ] );
   } );
 
   it ( 'should return errors if schema.type is not a string', () => {
@@ -394,8 +394,8 @@ describe ( 'validateSchema', () => {
       value: {}
     };
 
-    const result = validateSchema ( schema as any );
-    expect ( result ).toEqual ( [ 'schema.type is not a string' ] );
+    const result = validateSchema ( schema as any, 'prefix' );
+    expect ( result ).toEqual ( [ 'prefix.type is not a string' ] );
   } );
 
   it ( 'should return errors if schema.value is undefined', () => {
@@ -404,8 +404,8 @@ describe ( 'validateSchema', () => {
       value: undefined
     };
 
-    const result = validateSchema ( schema as any );
-    expect ( result ).toEqual ( [ 'schema.value is not defined' ] );
+    const result = validateSchema ( schema as any, 'prefix' );
+    expect ( result ).toEqual ( [ 'prefix.value is not defined' ] );
   } );
 } );
 
@@ -616,14 +616,13 @@ describe ( 'validateConfig', () => {
 
     const result = validateConfig ( emptyConfig );
 
-    expect ( result ).toEqual ( [
+    expect ( result ).toEqual ([
       "Directories is not an object",
       "ai is not an object",
       "Tika is not an object",
       "Nonfunctionals is not an object",
-      "Schema is not an object",
-      "prompt is not defined",
-      "Report is not an object"
-    ] );
+      "Report is not an object",
+      "transform is not an object"
+    ]);
   } );
 } );

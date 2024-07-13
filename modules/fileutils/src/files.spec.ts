@@ -1,5 +1,5 @@
 import { promises as fs } from 'fs';
-import { calculateSHA256, Digest, getDirectoriesRecursively, getFilesRecursively, transformFiles, transformIfShaChanged, TransformShaConfig } from "./files";
+import { calculateSHA256, Digest, getDirectoriesRecursively, getFilesRecursively, transformFiles, TransformFilesConfig } from "./files";
 
 async function readAll ( dir: string ) {
   const result: string[] = []
@@ -10,16 +10,18 @@ async function readAll ( dir: string ) {
   return result;
 }
 async function checkWithoutOld () {
-  expect ( await readAll ( 'output' ) ).toEqual ( [
-    "output/a/a1.json: passed old: false new: 9",
-    "output/b/b1.json: passed old: false new: 8",
-    "output/test.json: passed old: false new: 15" ] )
+  expect ( await readAll ( 'output' ) ).toEqual ([
+    "output/a/a1.json: passed marker: false new: 9",
+    "output/b/b1.json: passed marker: false new: 8",
+    "output/test.json: passed marker: false new: 15"
+  ] )
 }
 async function checkWithNew () {
-  expect ( await readAll ( 'output' ) ).toEqual (
-    [ "output/a/a1.json: passed old: true new: 9",
-      "output/b/b1.json: passed old: true new: 8",
-      "output/test.json: passed old: true new: 15" ] )
+  expect ( await readAll ( 'output' ) ).toEqual (    [
+      "output/a/a1.json: passed marker: true new: 9",
+      "output/b/b1.json: passed marker: true new: 8",
+      "output/test.json: passed marker: true new: 15"
+    ])
 }
 describe ( 'files', () => {
   describe ( 'getFilesRecursively', () => {
@@ -53,23 +55,43 @@ describe ( 'files', () => {
       await fs.rm ( 'output', { recursive: true, force: true } )
     } )
     it ( 'should generate an output file that is the letter count of the output. Does not send old if not asked', async () => {
-      const transform = transformFiles ( async ( s: string, old: string | undefined ) => `passed old: ${old !== undefined} new: ${s.length}`, { filter: f => f.endsWith ( '.json' ) } )
-      expect ( await transform ( 'test', 'output' ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 } )
+      const config: TransformFilesConfig = {
+        filter: f => f.endsWith ( '.json' ),
+        inputDir: 'test',
+        outputDir: 'output',
+        fn: async ( s: string, marker: string | undefined, filenameFn ) => [ { file: filenameFn(0), content: `passed marker: ${marker !== undefined} new: ${s.length}` } ]
+      } //= transformFiles (
+
+      expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 ,  "markerErrors": [],} )
       await checkWithoutOld ();
-      expect ( await transform ( 'test', 'output' ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 } )
+      expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 ,  "markerErrors": [],} )
       await checkWithoutOld ();
     } );
-    it ( 'should pass the output to our letter count if they exist', async () => {
-      const transform = transformFiles ( async ( s: string, old: string | undefined ) => `passed old: ${old !== undefined} new: ${s.length}`, { filter: f => f.endsWith ( '.json' ), includeOutput: true } )
-      expect ( await transform ( 'test', 'output' ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 } )
+    it ( 'should pass the marker to our letter count if they exist', async () => {
+      const config: TransformFilesConfig = {
+        filter: f => f.endsWith ( '.json' ),
+        inputDir: 'test',
+        outputDir: 'output',
+        markerFn: async ( config, file ) => `${file}_marker`,
+        fn: async ( s: string, marker: string | undefined, filenameFn ) => [ { file: filenameFn(0), content: `passed marker: ${marker !== undefined} new: ${s.length}` } ]
+      } //= transformFiles (
+
+
+      expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 , "markerErrors":[]} )
       await checkWithoutOld ();
-      expect ( await transform ( 'test', 'output' ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 } )
+      expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3, "markerErrors":[] } )
       await checkWithNew ();
     } );
-    it ( 'should not generate a file if the result of the fn is undefined', async () => {
-      const fn = async ( s: string, old: string | undefined ) => s.length === 8 ? undefined : 'result'
-      const transform = transformFiles ( fn, { filter: f => f.endsWith ( '.json' ), includeOutput: true } )
-      expect ( await transform ( 'test', 'output' ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 2 } )
+    it ( 'should not generate a file if the result of the fn is []]', async () => {
+
+      const config: TransformFilesConfig = {
+        filter: f => f.endsWith ( '.json' ),
+        inputDir: 'test',
+        outputDir: 'output',
+        markerFn: async ( config, file ) => `${file}_marker`,
+        fn: async ( s: string, old: string | undefined,filenameFn) => s.length === 8 ? [] : [ { file:filenameFn(0), content: 'result' } ],
+      } //= tran
+      await transformFiles ( config )
       await expect ( await readAll ( 'output' ) ).toEqual ( [
         "output/a/a1.json: result",
         "output/test.json: result" ] );
@@ -100,38 +122,4 @@ describe ( 'files', () => {
     return output ? `simple-sha-${output}` : '';
   };
 
-  describe ( 'transformIfShaChanged', () => {
-    test ( 'should return undefined if SHA matches', async () => {
-      const config: TransformShaConfig = { digest: simpleDigest, getShaFromOutput: simpleGetShaFromOutput };
-      const fn = async ( inp: string, sha: string, oldOutput: string | undefined ) => 'transformed content';
-
-      const transform = transformIfShaChanged ( fn, config );
-
-      const result = await transform ( 'test input', 'test input' );
-
-      expect ( result ).toBeUndefined ();
-    } );
-
-    test ( 'should call fn and return its result if SHA does not match', async () => {
-      const config: TransformShaConfig = { digest: simpleDigest, getShaFromOutput: simpleGetShaFromOutput };
-      const fn = async ( inp: string, sha: string, oldOutput: string | undefined ) => inp + '/' + sha + '/' + oldOutput;
-
-      const transform = transformIfShaChanged ( fn, config );
-
-      const result = await transform ( 'test input', 'different old output' );
-
-      expect ( result ).toBe ( 'test input/simple-sha-test input/different old output' );
-    } );
-
-    test ( 'should call fn and return its result if there is no old output', async () => {
-      const config: TransformShaConfig = { digest: simpleDigest, getShaFromOutput: simpleGetShaFromOutput };
-      const fn = async ( inp: string, sha: string, oldOutput: string | undefined ) => inp + '/' + sha + '/' + oldOutput;
-
-      const transform = transformIfShaChanged ( fn, config );
-
-      const result = await transform ( 'test input', undefined );
-
-      expect ( result ).toBe ( 'test input/simple-sha-test input/undefined' );
-    } );
-  } );
 } );

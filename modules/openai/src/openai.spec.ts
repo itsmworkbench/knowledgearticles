@@ -68,6 +68,9 @@ describe ( 'openAiClient', () => {
 
     await client ( messages );
 
-    expect ( console.log ).toHaveBeenCalledWith ( 'openAiMessagesClient', messages );
+    expect ( console.log ).toHaveBeenCalledWith ( 'openAiMessagesClient', { messages, model: "davinci" } );
+
   } );
 } );
+
+
