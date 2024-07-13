@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosStatic } from "axios";
+import { AxiosInstance, AxiosStatic } from "axios";
 
 
 export type Message = {
@@ -20,17 +20,20 @@ export const openAiClient = ( config: OpenAiConfig, ): AiClient => {
   if ( !model ) model = "davinci"
   if ( !customisation ) customisation = {}
   return async ( messages: Message[] ): Promise<Message[]> => {
-    try {
       const data = {
         model,
         messages,
         ...customisation
       };
+    try {
       if ( debug ) console.log ( 'openAiMessagesClient', data )
       const response = await axios.post ( `/v1/chat/completions`, data );
       return response.data.choices.map ( ( x: any ) => x.message );
     } catch ( e: any ) {
-      if ( e.code && e.code.includes ( 'ERR_BAD_REQUEST' ) ) throw new Error ( 'Bad Request' )
+      if ( e.code && e.code.includes ( 'ERR_BAD_REQUEST' ) ) {
+        console.error('badrequest', data)
+        throw new Error ( 'Bad Request' )
+      }
       throw e
     }
   }
