@@ -30,7 +30,8 @@
   },
   "links":       [
     "@summarisation/fileutils",
-    "@summarisation/openai"
+    "@summarisation/openai",
+    "@summarisation/tika"
   ],
   "guards":      {
     "compile": true,

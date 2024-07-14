@@ -1,0 +1,66 @@
+{
+  "name": "@summarisation/tika",
+  "description": "Running the tika server and a client for it",
+  "version": "0.3.3",
+  "main": "dist/index",
+  "types": "dist/index",
+  "browser": {
+    "child_process": false
+  },
+  "browserslist": {
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ],
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ]
+  },
+  "dependencies": {
+    "tree-kill": "^1.2.2",
+    "@laoban/utils": "1.4.51",
+    "@laoban/variables": "1.4.51",
+    "axios": "^1.7.2",
+    "debug": "^4.3.4"
+  },
+  "devDependencies": {
+    "axios-mock-adapter": "^1.22.0",
+    "typescript": "^5.2.2",
+    "@testing-library/jest-dom": "^6.1.4",
+    "@types/jest": "^29.0.0",
+    "@types/node": "^14.0.0",
+    "jest": "^29.0.0",
+    "ts-jest": "^29.0.0"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/*.stories.*"
+        ],
+        "rules": {
+          "import/no-anonymous-default-export": "off"
+        }
+      }
+    ]
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/src/"
+  ],
+  "keywords": [],
+  "license": "MIT",
+  "repository": "git@github.com:itsmworkbench/summarisation.git",
+  "scripts": {
+    "test": "jest --config jest.config.json --env node",
+    "test:watch": "npm run test -- --watch"
+  }
+}

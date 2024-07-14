@@ -35,6 +35,7 @@
     "@itsmworkbench/kleislis": "0.3.10",
     "@summarisation/fileutils": "0.3.3",
     "@summarisation/openai": "0.3.3",
+    "@summarisation/tika": "0.3.3",
     "debug": "^4.3.4"
   },
   "devDependencies": {

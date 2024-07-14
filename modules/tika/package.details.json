@@ -1,0 +1,26 @@
+{
+  "template":    "typescript",
+  "name":        "@summarisation/tika",
+  "description": "Running the tika server and a client for it",
+  "packageJson": {
+    "dependencies":    {
+      "tree-kill":         "^1.2.2",
+      "@laoban/utils":     "${properties.laobanVersion}",
+      "@laoban/variables": "${properties.laobanVersion}",
+      "axios":             "${properties.axios}"
+    },
+    "devDependencies": {
+      "axios-mock-adapter": "^1.22.0"
+    },
+    "browser":         {
+      "child_process": false
+    }
+  },
+  "links":       [
+  ],
+  "guards":      {
+    "compile": true,
+    "publish": true,
+    "test":    true
+  }
+}

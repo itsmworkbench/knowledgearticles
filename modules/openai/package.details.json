@@ -6,7 +6,7 @@
     "dependencies":    {
       "@laoban/utils":     "${properties.laobanVersion}",
       "@laoban/variables": "${properties.laobanVersion}",
-      "axios":             "^1.7.2"
+      "axios":             "${properties.axios}"
     },
     "devDependencies": {
       "axios-mock-adapter": "^1.22.0"

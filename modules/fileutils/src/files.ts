@@ -170,6 +170,12 @@ export const transformFilesIfShaChanged = ( config: TransformDirectoryIfShaChang
   return transformFiles ( { ...rest, fn: newFn } )
 };
 
+export type DigestBuffer = ( s: Buffer ) => Promise<string>
+export const sha256FromBuffer: DigestBuffer = async ( s: Buffer ): Promise<string> => {
+  const hashSum = createHash ( 'sha256' );
+  hashSum.update ( s );
+  return hashSum.digest ( 'base64url' );
+}
 export type Digest = ( s: string ) => Promise<string>
 
 export const calculateSHA256: Digest = async ( s: string ): Promise<string> => {
