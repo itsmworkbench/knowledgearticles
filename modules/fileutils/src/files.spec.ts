@@ -9,20 +9,6 @@ async function readAll ( dir: string ) {
   }
   return result;
 }
-async function checkWithoutOld () {
-  expect ( await readAll ( 'output' ) ).toEqual ([
-    "output/a/a1.json: passed marker: false new: 9",
-    "output/b/b1.json: passed marker: false new: 8",
-    "output/test.json: passed marker: false new: 15"
-  ] )
-}
-async function checkWithNew () {
-  expect ( await readAll ( 'output' ) ).toEqual (    [
-      "output/a/a1.json: passed marker: true new: 9",
-      "output/b/b1.json: passed marker: true new: 8",
-      "output/test.json: passed marker: true new: 15"
-    ])
-}
 describe ( 'files', () => {
   describe ( 'getFilesRecursively', () => {
     it ( 'should read over files', async () => {
@@ -59,13 +45,18 @@ describe ( 'files', () => {
         filter: f => f.endsWith ( '.json' ),
         inputDir: 'test',
         outputDir: 'output',
-        fn: async ( s: string, marker: string | undefined, filenameFn ) => [ { file: filenameFn(0), content: `passed marker: ${marker !== undefined} new: ${s.length}` } ]
+        fn: async ( s: string, marker: string | undefined, filenameFn ) => [ { file: filenameFn(0), content: `passed marker: ${marker} new: ${s.length}` } ]
       } //= transformFiles (
 
       expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 ,  "markerErrors": [],} )
-      await checkWithoutOld ();
+      let expected = [
+        "output/a/a1.json: passed marker: undefined new: 9",
+        "output/b/b1.json: passed marker: undefined new: 8",
+        "output/test.json: passed marker: undefined new: 15"
+      ];
+      await expect ( await readAll ( 'output' ) ).toEqual ( expected );
       expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 ,  "markerErrors": [],} )
-      await checkWithoutOld ();
+      await expect ( await readAll ( 'output' ) ).toEqual (expected);
     } );
     it ( 'should pass the marker to our letter count if they exist', async () => {
       const config: TransformFilesConfig = {
@@ -73,14 +64,19 @@ describe ( 'files', () => {
         inputDir: 'test',
         outputDir: 'output',
         markerFn: async ( config, file ) => `${file}_marker`,
-        fn: async ( s: string, marker: string | undefined, filenameFn ) => [ { file: filenameFn(0), content: `passed marker: ${marker !== undefined} new: ${s.length}` } ]
+        fn: async ( s: string, marker: string | undefined, filenameFn ) => [ { file: filenameFn(0), content: `passed marker: ${marker} new: ${s.length}` } ]
       } //= transformFiles (
 
 
       expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3 , "markerErrors":[]} )
-      await checkWithoutOld ();
+      let expected = [
+        "output/a/a1.json: passed marker: test\\a\\a1.json_marker new: 9",
+        "output/b/b1.json: passed marker: test\\b\\b1.json_marker new: 8",
+        "output/test.json: passed marker: test\\test.json_marker new: 15"
+      ];
+      await expect ( await readAll ( 'output' ) ).toEqual ( expected );
       expect ( await transformFiles ( config ) ).toEqual ( { "failed": [], "readCount": 3, "writeCount": 3, "markerErrors":[] } )
-      await checkWithNew ();
+      await expect ( await readAll ( 'output' ) ).toEqual ( expected);
     } );
     it ( 'should not generate a file if the result of the fn is []]', async () => {
 

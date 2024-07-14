@@ -1,7 +1,7 @@
 {
   "name": "@summarisation/summarise",
   "description": "cli for summariser",
-  "version": "0.2.16",
+  "version": "0.3.0",
   "main": "dist/index",
   "types": "dist/index",
   "bin": {
@@ -33,8 +33,8 @@
     "@itsmworkbench/cli": "0.3.10",
     "@itsmworkbench/jsyaml": "0.3.10",
     "@itsmworkbench/kleislis": "0.3.10",
-    "@summarisation/fileutils": "0.2.16",
-    "@summarisation/openai": "0.2.16",
+    "@summarisation/fileutils": "0.3.0",
+    "@summarisation/openai": "0.3.0",
     "debug": "^4.3.4"
   },
   "devDependencies": {
