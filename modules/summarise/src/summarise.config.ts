@@ -21,7 +21,9 @@ export type SummariseConfig = {
   report: SumariseReport
   transform: SummariseTransform
 }
+type TransformationType =  'onePerFile'| 'onePerPage'
 export type SummariseTransform = {
+  type: TransformationType
   schema: SummariseSchema
   prompt: string
 }
@@ -150,6 +152,9 @@ export function validateReport ( report: SumariseReport ) {
 export function validationTransform ( tx: SummariseTransform ): string[] {
   if ( !tx || typeof tx !== 'object' ) return [ 'transform is not an object' ]
   const errors: string[] = []
+  if ( tx.type === undefined ) return [ 'transform.type is not defined' ]
+  const legal = [ 'onePerFile', 'onePerPage' ]
+  if ( !legal.includes ( tx.type ) ) return [ `transform.type (${tx.type}) is not valid. Valid values are ${legal.join ( ', ' )}` ]
   errors.push ( ...validateSchema ( tx.schema, 'transform.schema' ) )
   errors.push ( ...validateNeeded ( tx.prompt, 'transform.prompt' ) )
   return errors

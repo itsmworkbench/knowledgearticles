@@ -70,17 +70,19 @@ export type InputOutputAndNewFilenameFnDir = {
 export const inputToOutputFileName = ( inputDir: string, outputDir: string, config: InputOutputAndNewFilenameFnDir ) => ( file: string, index?: number ) => {
   const { newFileNameFn = ( f: string, index: number ) => f } = config
   if ( index === undefined ) index = 0
-  const relativePath = path.relative ( inputDir, newFileNameFn ( file, index ) );
+  let to = newFileNameFn ( file, index );
+  const relativePath = path.relative ( inputDir, to );
   const outputFilePath = path.join ( outputDir, relativePath );
   return outputFilePath;
 };
 
 export type TransformOneFileFn = ( file: string, marker: string | undefined, filenameFn: ( index: number ) => string ) => Promise<FileAndContent[]>
-export type MarkerFn = ( config: TransformFilesConfig, file: string ) => Promise<string | undefined>
+export type ReadFileFn = ( file: string ) => Promise<string>
 export type TransformFilesConfig = {
   inputDir: string,
   outputDir: string,
   fn: TransformOneFileFn
+  readFile: ReadFileFn
   markerFn?: MarkerFn
   filter?: ( file: string ) => boolean
   newFileNameFn?: ( file: string, index: number ) => string
@@ -88,11 +90,12 @@ export type TransformFilesConfig = {
   debug?: boolean
 }
 
+export type MarkerFn = ( config: TransformFilesConfig, file: string ) => Promise<string | undefined>
 export const markerIsFromOldFile = ( findMarker: ( fileName: string, content: string ) => string | undefined ): MarkerFn =>
   async ( config: TransformFilesConfig, file: string ) => {
     const { inputDir, outputDir } = config
     const outputFilePath = inputToOutputFileName ( inputDir, outputDir, config ) ( file, 0 );
-    const oldOutput = await fs.readFile ( outputFilePath, 'utf-8' ).catch ( () => undefined )
+    const oldOutput = await config.readFile ( outputFilePath ).catch ( () => undefined )
     const marker = oldOutput === undefined ? undefined : findMarker ( file, oldOutput )
     return marker
   };
@@ -119,11 +122,11 @@ async function findMarker ( config: TransformFilesConfig, metrics: TranformFiles
   }
 }
 const transformOneFile = ( config: TransformFilesConfig ) => {
-  const { fn, inputDir, outputDir, debug, dryRun, markerFn, newFileNameFn = (f => f) } = config
+  const { fn, inputDir, readFile, outputDir, debug, dryRun, markerFn, newFileNameFn = (f => f) } = config
   return async ( file: string ) => {
     const metrics: TranformFilesMetric = { readCount: 0, writeCount: 0, failed: [], markerErrors: [] }
     try {
-      const content: string = await fs.readFile ( file, 'utf-8' );
+      const content: string = await readFile ( file );
       const marker = await findMarker ( config, metrics, file )
       if ( debug || dryRun ) console.log ( 'file', file, 'marker', marker )
       const newContent = await fn ( content, marker,

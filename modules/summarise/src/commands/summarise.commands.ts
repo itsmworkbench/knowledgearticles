@@ -16,6 +16,7 @@ export function addSummaryCommand<Commander, Config> ( tc: ContextConfigAndComma
     options: {
       '--clean': { description: 'Delete the output file directories at the start' },
       '--debug': { description: 'Show debug information' },
+      '--onePer <type>': { description: `One file per page or per file. Legal values 'page' or  'default'. overrides config`, default: tc.config.transform.type },
       '--noReport': { description: `Don't make a report` },
       '--noNonFunctionals': { description: 'Do not use non functionals' },
       '--dryRun': { description: `Just do a dry run instead of actually making the pipelines` }

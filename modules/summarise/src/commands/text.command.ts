@@ -63,6 +63,7 @@ export function textAction<Commander, Config> ( tc: ContextConfigAndCommander<Co
       outputDir: summary,
       digest,
       fn: withNfcs,
+      readFile: async ( file: string ) => fs.readFileSync ( file, 'utf8' ),
       markerFn: markerIsShaInOldFile,
       getShaFromOutput: async ( s: string ) => {
         try {
