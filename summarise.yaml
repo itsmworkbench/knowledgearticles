@@ -38,13 +38,13 @@ report:
 #    example:
 #      type: number
 transform:
-  type: onePerFile # or onePerPage
+  type: onePerFile # onePerFile or onePerPage
   prompt: |
     I want you to evaluate a Knowledge Article for an ITSM issue using the following four areas
     
     description: Do we have a clear description of what the issue is that this KEDB is about? To be good it should describe the symptoms, the cause and the impact
-    detection: Do we have a clear technical mechanism to determine that the issue exists. For example sql calls, api calls and so on
-    and if we do, do we have enough information. For example with sql we need database connection details. For apis we need the urls
+    detection:  Do we have a clear technical mechanism to determine that the issue exists. For example sql calls, api calls and so on
+                and if we do, do we have enough information. For example with sql we need database connection details. For apis we need the urls
     resolution: Do we have a clear technical mechanism to resolve the issue. Same example issues (ie. sql needs conneciton issues)
     validation: Do we have a clear technical mechanism to validate that we have resolved the issue
     

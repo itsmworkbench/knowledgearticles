@@ -4,7 +4,7 @@
   "description": "cli for summariser",
   "packageJson": {
     "dependencies":    {
-      "cheerio":                    "^1.0.0-rc.12",
+      "cheerio":                    "${properties.cheerio}",
       "@laoban/utils":              "${properties.laobanVersion}",
       "@laoban/filesops-node":      "${properties.laobanVersion}",
       "@laoban/variables":          "${properties.laobanVersion}",

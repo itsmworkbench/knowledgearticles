@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import { promises as fs } from 'fs';
 import * as path from 'path';
+import { findMarker, MarkerFn } from "./marker";
 
 async function* getChildDirectories ( dir: string, filterFn?: ( name: string ) => boolean ): AsyncGenerator<string> {
   const dirEntries = await fs.readdir ( dir, { withFileTypes: true } );
@@ -90,36 +91,9 @@ export type TransformFilesConfig = {
   debug?: boolean
 }
 
-export type MarkerFn = ( config: TransformFilesConfig, file: string ) => Promise<string | undefined>
-export const markerIsFromOldFile = ( findMarker: ( fileName: string, content: string ) => string | undefined ): MarkerFn =>
-  async ( config: TransformFilesConfig, file: string ) => {
-    const { inputDir, outputDir } = config
-    const outputFilePath = inputToOutputFileName ( inputDir, outputDir, config ) ( file, 0 );
-    const oldOutput = await config.readFile ( outputFilePath ).catch ( () => undefined )
-    const marker = oldOutput === undefined ? undefined : findMarker ( file, oldOutput )
-    return marker
-  };
-
-export const markerIsFromJsonInOldFile = ( findMarker: ( json: any ) => string | undefined ): MarkerFn =>
-  markerIsFromOldFile ( ( filename, content: string ) => findMarker ( JSON.parse ( content ) ) )
-
-export const markerIsFieldInOldFile = ( field: string ): MarkerFn =>
-  markerIsFromJsonInOldFile ( ( content: any ) => content?.[ field ] )
-
-export const markerIsShaInOldFile: MarkerFn = markerIsFieldInOldFile ( 'sha' )
-
 export type FileAndContent = {
   file: string
   content: string
-}
-async function findMarker ( config: TransformFilesConfig, metrics: TranformFilesMetric, file: string ): Promise<string | undefined> {
-  const { markerFn, debug } = config
-  try {
-    return markerFn === undefined ? undefined : await markerFn ( config, file );
-  } catch ( e: any ) {
-    if ( debug ) console.error ( e )
-    metrics.markerErrors.push ( file )
-  }
 }
 const transformOneFile = ( config: TransformFilesConfig ) => {
   const { fn, inputDir, readFile, outputDir, debug, dryRun, markerFn, newFileNameFn = (f => f) } = config
